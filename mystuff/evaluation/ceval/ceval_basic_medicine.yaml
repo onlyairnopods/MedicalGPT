@@ -1,0 +1,10 @@
+include: _default_ceval_yaml
+
+task: ceval_basic_medicine
+
+dataset_kwargs:
+  data_files:
+    dev: "/cephfs/songyue/zzlai/hf_cache/hub/datasets--ceval--ceval-exam/snapshots/617524a00b307ff6f9933702f724131fe12ca7ce/basic_medicine/dev*.parquet"
+    test: "/cephfs/songyue/zzlai/hf_cache/hub/datasets--ceval--ceval-exam/snapshots/617524a00b307ff6f9933702f724131fe12ca7ce/basic_medicine/test*.parquet"
+
+description: "以下是中国关于基础医学的单项选择题，请选出其中的正确答案。\n\n"

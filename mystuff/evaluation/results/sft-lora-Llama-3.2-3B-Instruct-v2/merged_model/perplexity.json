@@ -1,0 +1,8 @@
+{
+  "/cephfs/songyue/zzlai/hf_cache/hub/datasets--FreedomIntelligence--Huatuo26M-Lite/snapshots/90ce61699e90568db82cdce4c4035c6918d70aa6": {
+    "model_id": "/cephfs/songyue/zzlai/MedicalGPT/outputs-sft-lora-Llama-3.2-3B-Instruct-v2/merged_model",
+    "dataset": "/cephfs/songyue/zzlai/hf_cache/hub/datasets--FreedomIntelligence--Huatuo26M-Lite/snapshots/90ce61699e90568db82cdce4c4035c6918d70aa6",
+    "num_samples": 10000,
+    "perplexity": 6.255066564204995
+  }
+}

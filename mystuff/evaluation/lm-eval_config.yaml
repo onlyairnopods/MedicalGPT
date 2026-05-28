@@ -1,0 +1,22 @@
+# basic_eval.yaml
+model: hf
+model_args:
+  pretrained: Qwen/Qwen3-4B-Instruct-2507
+  dtype: bfloat16
+  # enable_thinking: false
+  # enable_thinking: true
+  # think_end_token: "</think>"
+
+tasks:
+  - ceval_basic_medicine
+  - ceval_clinical_medicine
+  - ceval_physician
+include_path: ./ceval/
+
+batch_size: auto:4
+device: cuda
+
+output_path: ./results/Qwen3-4B-Instruct-2507/
+log_samples: true
+write_out: true
+show_config: true

@@ -1,0 +1,21 @@
+{
+  "input": "analysis_out_v3/prototype_stats.csv",
+  "output_dir": "analysis_out_v3/prototype_plots",
+  "rows_after_filter": 74,
+  "topn": 30,
+  "min_count": 1,
+  "charts": [
+    "top_prototypes_by_count.png",
+    "top_prototypes_by_share.png",
+    "prototype_count_distribution.png",
+    "prototype_score_mean_distribution.png",
+    "prototype_malformed_rate_distribution.png",
+    "prototype_dup_rate_distribution.png"
+  ],
+  "count_stats": {
+    "min": 83.0,
+    "max": 1057311.0,
+    "mean": 26342.391891891893,
+    "median": 6574.5
+  }
+}

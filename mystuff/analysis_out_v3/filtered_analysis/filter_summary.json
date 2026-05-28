@@ -1,0 +1,15 @@
+{
+  "input_rows": 34429,
+  "kept_rows": 34429,
+  "dropped_rows": 0,
+  "kept_rate": 1.0,
+  "drop_reason_counts": {},
+  "settings": {
+    "min_score": -1.0,
+    "min_assistant_chars": 0,
+    "max_total_chars": 0,
+    "dedupe": "normalized",
+    "per_prototype_topk": 0,
+    "per_prototype_min_quantile": -1.0
+  }
+}

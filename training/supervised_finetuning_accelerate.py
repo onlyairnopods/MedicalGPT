@@ -22,12 +22,22 @@ import sys
 import json
 from dataclasses import dataclass, field
 from glob import glob
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Callable
 
 import torch
 import torch.utils.data
 from datasets import load_dataset
 from loguru import logger
+
+# 全局变量，控制是否只在主进程打印日志
+# 初始为True表示所有进程都打印，Accelerator创建后会更新为accelerator.is_main_process
+_log_on_main_only = True
+
+def log(func: Callable, *args, **kwargs):
+    """包装logger方法，只在主进程执行（Accelerator创建后生效）"""
+    if _log_on_main_only:
+        func(*args, **kwargs)
+        
 from peft import LoraConfig, TaskType, get_peft_model, PeftModel, prepare_model_for_kbit_training
 from transformers import (
     AutoConfig,
@@ -192,11 +202,11 @@ def load_datasets(data_args, model_args):
         data_files = {}
         if data_args.train_file_dir is not None and os.path.exists(data_args.train_file_dir):
             train_data_files = glob(f'{data_args.train_file_dir}/**/*.jsonl', recursive=True)
-            logger.info(f"train files: {train_data_files}")
+            log(logger.info,f"train files: {train_data_files}")
             data_files["train"] = train_data_files
         if data_args.validation_file_dir is not None and os.path.exists(data_args.validation_file_dir):
             eval_data_files = glob(f'{data_args.validation_file_dir}/**/*.jsonl', recursive=True)
-            logger.info(f"eval files: {eval_data_files}")
+            log(logger.info,f"eval files: {eval_data_files}")
             data_files["validation"] = eval_data_files
         raw_datasets = load_dataset(
             'json',
@@ -213,7 +223,7 @@ def load_datasets(data_args, model_args):
             raw_datasets["train"] = split["train"]
             raw_datasets["validation"] = split["test"]
 
-    logger.info(f"Raw datasets: {raw_datasets}")
+    log(logger.info,f"Raw datasets: {raw_datasets}")
     return raw_datasets
 
 
@@ -371,7 +381,7 @@ def check_and_optimize_memory():
     if not torch.cuda.is_available():
         return
 
-    logger.info("🔍 检查GPU内存状态...")
+    log(logger.info,"🔍 检查GPU内存状态...")
 
     # 清理缓存
     torch.cuda.empty_cache()
@@ -385,28 +395,28 @@ def check_and_optimize_memory():
         cached = torch.cuda.memory_reserved(i) / 1024 ** 3
         free = total_memory - allocated - cached
 
-        logger.info(f"GPU {i} ({props.name}):")
-        logger.info(f"  总内存: {total_memory:.1f}GB")
-        logger.info(f"  已分配: {allocated:.1f}GB")
-        logger.info(f"  已缓存: {cached:.1f}GB")
-        logger.info(f"  可用: {free:.1f}GB")
+        log(logger.info,f"GPU {i} ({props.name}):")
+        log(logger.info,f"  总内存: {total_memory:.1f}GB")
+        log(logger.info,f"  已分配: {allocated:.1f}GB")
+        log(logger.info,f"  已缓存: {cached:.1f}GB")
+        log(logger.info,f"  可用: {free:.1f}GB")
 
         if free < 2.0:  # 如果可用内存少于2GB
-            logger.warning(f"⚠️ GPU {i} 可用内存不足 ({free:.1f}GB)，建议:")
-            logger.warning("  1. 使用 --load_in_4bit 启用4bit量化")
-            logger.warning("  2. 减小 --per_device_train_batch_size")
-            logger.warning("  3. 增加 --gradient_accumulation_steps")
-            logger.warning("  4. 减小 --model_max_length")
+            log(logger.warning,f"⚠️ GPU {i} 可用内存不足 ({free:.1f}GB)，建议:")
+            log(logger.warning,"  1. 使用 --load_in_4bit 启用4bit量化")
+            log(logger.warning,"  2. 减小 --per_device_train_batch_size")
+            log(logger.warning,"  3. 增加 --gradient_accumulation_steps")
+            log(logger.warning,"  4. 减小 --model_max_length")
 
     # 设置内存优化选项
     if hasattr(torch.backends.cuda, 'enable_flash_sdp'):
         torch.backends.cuda.enable_flash_sdp(True)
-        logger.info("✅ 启用Flash Attention优化")
+        log(logger.info,"✅ 启用Flash Attention优化")
 
     # 启用内存高效的注意力机制
     if hasattr(torch.backends.cuda, 'enable_mem_efficient_sdp'):
         torch.backends.cuda.enable_mem_efficient_sdp(True)
-        logger.info("✅ 启用内存高效注意力机制")
+        log(logger.info,"✅ 启用内存高效注意力机制")
 
 
 def get_unwrapped_model(model):
@@ -427,22 +437,25 @@ def main():
         model_args, data_args, training_args, script_args = parser.parse_args_into_dataclasses(look_for_args_file=False)
 
     # 设置日志 - 只在主进程输出
-    logger.info(f"🚀 使用Accelerate库进行多GPU训练")
-    logger.info("🚀 开始初始化Accelerator...")
+    log(logger.info,f"🚀 使用Accelerate库进行多GPU训练")
+    log(logger.info,"🚀 开始初始化Accelerator...")
     # 直接创建Accelerator，让它自己处理状态
     accelerator = Accelerator()
-    logger.info("✅ Accelerator初始化完成")
+    global _log_on_main_only
+    _log_on_main_only = accelerator.is_main_process
+    mixed_precision_mode = accelerator.state._mixed_precision
+    log(logger.info,"✅ Accelerator初始化完成")
     try:
-        logger.info(f"设备: {accelerator.device}")
-        logger.info(f"检测到 {accelerator.num_processes} 个进程")
-        logger.info(f"当前进程: {accelerator.process_index}")
-        logger.info(f"分布式类型: {accelerator.distributed_type}")
+        log(logger.info,f"设备: {accelerator.device}")
+        log(logger.info,f"检测到 {accelerator.num_processes} 个进程")
+        log(logger.info,f"当前进程: {accelerator.process_index}")
+        log(logger.info,f"分布式类型: {accelerator.distributed_type}")
     except:
-        logger.warning("无法获取完整的Accelerator信息，但这不影响训练")
+        log(logger.warning,"无法获取完整的Accelerator信息，但这不影响训练")
 
-    logger.info(f"Model args: {model_args}")
-    logger.info(f"Training args: {training_args}")
-    logger.info(f"Script args: {script_args}")
+    log(logger.info,f"Model args: {model_args}")
+    log(logger.info,f"Training args: {training_args}")
+    log(logger.info,f"Script args: {script_args}")
 
     # 设置随机种子
     accelerate_set_seed(training_args.seed)
@@ -466,28 +479,28 @@ def main():
         else:
             tokenizer.eos_token = "</s>"
         tokenizer.add_special_tokens({"eos_token": tokenizer.eos_token})
-        logger.info(f"Add eos_token: {tokenizer.eos_token}")
+        log(logger.info,f"Add eos_token: {tokenizer.eos_token}")
 
     if tokenizer.bos_token_id is None:
         tokenizer.add_special_tokens({"bos_token": tokenizer.eos_token})
         tokenizer.bos_token_id = tokenizer.eos_token_id
-        logger.info(f"Add bos_token: {tokenizer.bos_token}")
+        log(logger.info,f"Add bos_token: {tokenizer.bos_token}")
 
     if tokenizer.pad_token_id is None:
         if tokenizer.unk_token_id is not None:
             tokenizer.pad_token = tokenizer.unk_token
         else:
             tokenizer.pad_token = tokenizer.eos_token
-        logger.info(f"Add pad_token: {tokenizer.pad_token}")
+        log(logger.info,f"Add pad_token: {tokenizer.pad_token}")
 
     IGNORE_INDEX = LabelSmoother.ignore_index if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
 
-    logger.info("✅ Tokenizer配置完成")
+    log(logger.info,"✅ Tokenizer配置完成")
 
     # 检查和优化内存
     check_and_optimize_memory()
 
-    logger.info("🔄 开始加载模型...")
+    log(logger.info,"🔄 开始加载模型...")
 
     # 加载模型配置
     torch_dtype = model_args.torch_dtype
@@ -512,16 +525,16 @@ def main():
     if model_args.flash_attn:
         if is_flash_attn_2_available:
             config_kwargs["attn_implementation"] = "flash_attention_2"
-            logger.info("Using FlashAttention-2 for faster training and inference.")
+            log(logger.info,"Using FlashAttention-2 for faster training and inference.")
         else:
-            logger.warning("FlashAttention-2 is not installed.")
+            log(logger.warning,"FlashAttention-2 is not installed.")
     config = AutoConfig.from_pretrained(model_args.model_name_or_path, **config_kwargs)
 
     # 检测GPU使用情况并优化内存配置
     total_memory = 0
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
-        logger.info(f"检测到 {num_gpus} 个GPU")
+        log(logger.info,f"检测到 {num_gpus} 个GPU")
 
         for i in range(num_gpus):
             gpu_memory = torch.cuda.get_device_properties(i).total_memory / 1024 ** 3
@@ -529,14 +542,14 @@ def main():
             cached = torch.cuda.memory_reserved(i) / 1024 ** 3
             free = gpu_memory - allocated
             total_memory += gpu_memory
-            logger.info(
+            log(logger.info,
                 f"GPU {i}: 总内存={gpu_memory:.1f}GB, 已分配={allocated:.1f}GB, 缓存={cached:.1f}GB, 可用={free:.1f}GB")
 
-        logger.info(f"总GPU内存: {total_memory:.1f}GB")
+        log(logger.info,f"总GPU内存: {total_memory:.1f}GB")
 
         # 清理GPU缓存
         torch.cuda.empty_cache()
-        logger.info("已清理GPU缓存")
+        log(logger.info,"已清理GPU缓存")
 
     # 估算模型大小（粗略估算）
     estimated_model_size_gb = 0
@@ -559,7 +572,7 @@ def main():
         else:
             estimated_model_size_gb = 10  # 默认估算
 
-    logger.info(f"估算模型大小: {estimated_model_size_gb:.1f}GB")
+    log(logger.info,f"估算模型大小: {estimated_model_size_gb:.1f}GB")
 
     # 根据模型大小和GPU数量以及用户选择决定使用DDP还是张量并行
     num_gpus = torch.cuda.device_count()
@@ -569,25 +582,25 @@ def main():
     if is_distributed:
         if script_args.use_tensor_parallel and estimated_model_size_gb > 20:
             # 用户选择使用张量并行且模型足够大
-            logger.info(f"🔧 使用张量并行策略 (模型大小: {estimated_model_size_gb:.1f}GB)")
+            log(logger.info,f"🔧 使用张量并行策略 (模型大小: {estimated_model_size_gb:.1f}GB)")
             use_tensor_parallel = True
 
             # 检查PyTorch版本是否支持张量并行
             import pkg_resources
             torch_version = pkg_resources.get_distribution("torch").version
             if pkg_resources.parse_version(torch_version) < pkg_resources.parse_version("2.5.0"):
-                logger.warning(f"⚠️ 当前PyTorch版本 {torch_version} 不支持张量并行，需要 >= 2.5.0")
-                logger.warning("⚠️ 自动切换到DDP模式")
+                log(logger.warning,f"⚠️ 当前PyTorch版本 {torch_version} 不支持张量并行，需要 >= 2.5.0")
+                log(logger.warning,"⚠️ 自动切换到DDP模式")
                 use_tensor_parallel = False
             else:
-                logger.info(f"✅ PyTorch版本 {torch_version} 支持张量并行")
+                log(logger.info,f"✅ PyTorch版本 {torch_version} 支持张量并行")
         else:
             # 使用DDP
-            logger.info(f"🔧 使用DDP进行多GPU训练 (模型大小: {estimated_model_size_gb:.1f}GB)")
+            log(logger.info,f"🔧 使用DDP进行多GPU训练 (模型大小: {estimated_model_size_gb:.1f}GB)")
             use_tensor_parallel = False
     else:
         # 单进程，可以使用device_map="auto"
-        logger.info("🔧 单进程训练")
+        log(logger.info,"🔧 单进程训练")
         use_tensor_parallel = True
 
     # 加载模型 - 根据选择的并行策略配置
@@ -614,12 +627,12 @@ def main():
                 max_memory[i] = f"{usable_mem // (1024 ** 3)}GiB"
 
             model_kwargs["max_memory"] = max_memory
-            logger.info(f"🔧 张量并行配置:")
-            logger.info(f"  device_map: auto")
-            logger.info(f"  max_memory: {max_memory}")
+            log(logger.info,f"🔧 张量并行配置:")
+            log(logger.info,f"  device_map: auto")
+            log(logger.info,f"  max_memory: {max_memory}")
     else:
         # DDP配置 - 不使用device_map
-        logger.info("🔧 DDP配置: 不使用device_map")
+        log(logger.info,"🔧 DDP配置: 不使用device_map")
         # 对于DDP，不设置device_map，让Accelerate处理设备分配
 
     # 加载模型
@@ -628,11 +641,11 @@ def main():
             model_args.model_name_or_path,
             **model_kwargs
         )
-        logger.info("✅ 模型加载完成")
+        log(logger.info,"✅ 模型加载完成")
     except OSError as e:
         if "tensor parallel is only supported for" in str(e):
-            logger.error(f"❌ 张量并行加载失败: {e}")
-            logger.info("🔄 尝试使用DDP模式重新加载...")
+            log(logger.error,f"❌ 张量并行加载失败: {e}")
+            log(logger.info,"🔄 尝试使用DDP模式重新加载...")
             # 移除张量并行相关配置
             if "device_map" in model_kwargs:
                 del model_kwargs["device_map"]
@@ -643,9 +656,17 @@ def main():
                 model_args.model_name_or_path,
                 **model_kwargs
             )
-            logger.info("✅ 使用DDP模式加载模型成功")
+            log(logger.info,"✅ 使用DDP模式加载模型成功")
         else:
             raise
+
+    # Compile model for faster training (PyTorch 2.0+, non-Windows)
+    if torch.__version__ >= '2' and sys.platform != 'win32' and not script_args.use_peft: # 如果使用PEFT，则不使用torch.compile
+        log(logger.info,"🔧 开启 torch.compile 优化")
+        model = torch.compile(model)
+    # 注意：torch.compile 后会返回 OptimizedModule 包装后的模型，
+    # 原生属性如 hf_device_map、named_parameters、get_input_embeddings 等仍可正常访问，
+    # 但直接替换 forward 等操作需要在 compile 之前完成
 
     # Patch MoE modules for DeepSpeed ZeRO-3
     if getattr(config, "model_type", None) == "mixtral" and is_deepspeed_zero3_enabled():
@@ -669,11 +690,11 @@ def main():
         set_z3_leaf_modules(model, [Qwen3_5MoeSparseMoeBlock])
 
     # 显示模型分布信息
-    logger.info("📊 模型分布情况:")
+    log(logger.info,"📊 模型分布情况:")
     if hasattr(model, 'hf_device_map') and model.hf_device_map:
-        logger.info("🔧 使用HuggingFace设备映射:")
+        log(logger.info,"🔧 使用HuggingFace设备映射:")
         for module_name, device in model.hf_device_map.items():
-            logger.info(f"  {module_name}: {device}")
+            log(logger.info,f"  {module_name}: {device}")
 
         # 统计每个GPU上的模块数量
         device_count = {}
@@ -681,9 +702,9 @@ def main():
             device_str = str(device)
             device_count[device_str] = device_count.get(device_str, 0) + 1
 
-        logger.info("📈 设备使用统计:")
+        log(logger.info,"📈 设备使用统计:")
         for device, count in device_count.items():
-            logger.info(f"  {device}: {count} 个模块")
+            log(logger.info,f"  {device}: {count} 个模块")
     else:
         # 检查模型参数的设备分布
         device_params = {}
@@ -696,24 +717,24 @@ def main():
             device_params[device]['size'] += param.numel()
             total_params += param.numel()
 
-        logger.info("📈 参数设备分布:")
+        log(logger.info,"📈 参数设备分布:")
         for device, info in device_params.items():
             param_size_gb = info['size'] * 4 / 1024 ** 3  # 假设float32
             percentage = info['size'] / total_params * 100
-            logger.info(f"  {device}: {info['count']} 个参数组, {param_size_gb:.2f}GB ({percentage:.1f}%)")
+            log(logger.info,f"  {device}: {info['count']} 个参数组, {param_size_gb:.2f}GB ({percentage:.1f}%)")
 
     # 显示GPU内存使用情况
     if torch.cuda.is_available():
-        logger.info("💾 GPU内存使用情况:")
+        log(logger.info,"💾 GPU内存使用情况:")
         for i in range(torch.cuda.device_count()):
             allocated = torch.cuda.memory_allocated(i) / 1024 ** 3
             cached = torch.cuda.memory_reserved(i) / 1024 ** 3
             total = torch.cuda.get_device_properties(i).total_memory / 1024 ** 3
-            logger.info(f"  GPU {i}: 已分配={allocated:.1f}GB, 缓存={cached:.1f}GB, 总计={total:.1f}GB")
+            log(logger.info,f"  GPU {i}: 已分配={allocated:.1f}GB, 缓存={cached:.1f}GB, 总计={total:.1f}GB")
 
     # 配置PEFT
     if script_args.use_peft:
-        logger.info("🔧 配置LoRA")
+        log(logger.info,"🔧 配置LoRA")
 
         if script_args.peft_path is not None:
             model = PeftModel.from_pretrained(model, script_args.peft_path, is_trainable=True)
@@ -746,16 +767,17 @@ def main():
 
         model.print_trainable_parameters()
     else:
-        logger.info("🔧 全参数训练模式")
+        log(logger.info,"🔧 全参数训练模式")
+        torch.set_float32_matmul_precision('high')
         model = model.float()
         print_trainable_parameters(model)
 
     # 加载数据集
-    logger.info("🔄 开始加载数据集...")
+    log(logger.info,"🔄 开始加载数据集...")
     raw_datasets = load_datasets(data_args, model_args)
 
     # 预处理数据集
-    logger.info("🔄 开始预处理数据集...")
+    log(logger.info,"🔄 开始预处理数据集...")
     preprocess_function = create_preprocess_function(tokenizer, prompt_template, script_args, IGNORE_INDEX)
 
     # 处理训练数据
@@ -770,7 +792,7 @@ def main():
             max_train_samples = min(len(train_dataset), data_args.max_train_samples)
             train_dataset = train_dataset.select(range(max_train_samples))
 
-        logger.debug(f"Example train_dataset[0]: {train_dataset[0]}")
+        log(logger.debug,f"Example train_dataset[0]: {train_dataset[0]}")
 
         tokenized_dataset = train_dataset.map(
             preprocess_function,
@@ -785,12 +807,12 @@ def main():
             num_proc=data_args.preprocessing_num_workers
         )
 
-        logger.debug(f"Num train_samples: {len(train_dataset)}")
-        logger.debug("Tokenized training example:")
-        logger.debug(f"Decode input_ids[0]:\n{tokenizer.decode(train_dataset[0]['input_ids'])}")
+        log(logger.debug,f"Num train_samples: {len(train_dataset)}")
+        log(logger.debug,"Tokenized training example:")
+        log(logger.debug,f"Decode input_ids[0]:\n{tokenizer.decode(train_dataset[0]['input_ids'])}")
         replaced_labels = [label if label != IGNORE_INDEX else tokenizer.pad_token_id
                            for label in list(train_dataset[0]['labels'])]
-        logger.debug(f"Decode labels[0]:\n{tokenizer.decode(replaced_labels)}")
+        log(logger.debug,f"Decode labels[0]:\n{tokenizer.decode(replaced_labels)}")
 
     # 处理验证数据
     eval_dataset = None
@@ -804,11 +826,11 @@ def main():
             max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
             eval_dataset = eval_dataset.select(range(max_eval_samples))
         eval_size = len(eval_dataset)
-        logger.debug(f"Num eval_samples: {eval_size}")
+        log(logger.debug,f"Num eval_samples: {eval_size}")
         if eval_size > 500:
-            logger.warning(f"Num eval_samples is large: {eval_size}, "
+            log(logger.warning,f"Num eval_samples is large: {eval_size}, "
                            f"training slow, consider reduce it by `--max_eval_samples=50`")
-        logger.debug(f"Example eval_dataset[0]: {eval_dataset[0]}")
+        log(logger.debug,f"Example eval_dataset[0]: {eval_dataset[0]}")
         eval_dataset = eval_dataset.map(
             preprocess_function,
             batched=True,
@@ -821,11 +843,11 @@ def main():
             lambda example: filter_empty_labels(example, IGNORE_INDEX),
             num_proc=data_args.preprocessing_num_workers
         )
-        logger.debug(f"Num eval_samples: {len(eval_dataset)}")
-        logger.debug("Tokenized eval example:")
-        logger.debug(tokenizer.decode(eval_dataset[0]['input_ids']))
+        log(logger.debug,f"Num eval_samples: {len(eval_dataset)}")
+        log(logger.debug,"Tokenized eval example:")
+        log(logger.debug,tokenizer.decode(eval_dataset[0]['input_ids']))
 
-    logger.info("✅ 数据集预处理完成")
+    log(logger.info,"✅ 数据集预处理完成")
 
     # 设置数据收集器
     data_collator = DataCollatorForSeq2Seq(
@@ -874,18 +896,18 @@ def main():
         # 设置学习率调度器
         lr_scheduler = get_linear_schedule_with_warmup(
             optimizer=optimizer,
-            num_warmup_steps=int(max_train_steps * training_args.warmup_ratio),
+            num_warmup_steps=int(max_train_steps * training_args.warmup_ratio) if training_args.warmup_ratio is not None else 0,
             num_training_steps=max_train_steps,
         )
 
     # 使用Accelerate准备所有组件 - 针对不同并行策略优化
-    logger.info("🔄 开始准备训练组件...")
+    log(logger.info,"🔄 开始准备训练组件...")
 
     # 检查模型是否已经分布在多个设备上
     model_is_distributed = hasattr(model, 'hf_device_map') and model.hf_device_map
 
     if model_is_distributed:
-        logger.info("🔧 检测到模型已分布在多设备，使用兼容模式")
+        log(logger.info,"🔧 检测到模型已分布在多设备，使用兼容模式")
         # 对于已经分布的模型，只准备数据加载器和优化器
         if training_args.do_train:
             # 不要让accelerator包装已经分布的模型
@@ -901,9 +923,9 @@ def main():
         # 手动设置模型的训练模式
         model.train() if training_args.do_train else model.eval()
 
-        logger.info("✅ 分布式模型训练组件准备完成")
+        log(logger.info,"✅ 分布式模型训练组件准备完成")
     else:
-        logger.info("🔧 标准模式，让Accelerate处理所有组件")
+        log(logger.info,"🔧 标准模式，让Accelerate处理所有组件")
         if training_args.do_train:
             model, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
                 model, optimizer, train_dataloader, lr_scheduler
@@ -915,7 +937,7 @@ def main():
             if eval_dataloader is not None:
                 eval_dataloader = accelerator.prepare(eval_dataloader)
 
-        logger.info("✅ 标准训练组件准备完成")
+        log(logger.info,"✅ 标准训练组件准备完成")
 
     # 启用梯度检查点
     if training_args.gradient_checkpointing and getattr(model, "supports_gradient_checkpointing", False):
@@ -923,27 +945,27 @@ def main():
         # 对于DDP包装的模型，需要通过module访问原始模型的config
         if hasattr(model, "module"):
             model.module.config.use_cache = False
-            logger.info("Gradient checkpointing enabled for DDP model.")
+            log(logger.info,"Gradient checkpointing enabled for DDP model.")
         else:
             model.config.use_cache = False
-            logger.info("Gradient checkpointing enabled.")
+            log(logger.info,"Gradient checkpointing enabled.")
     else:
         if hasattr(model, "module"):
             model.module.config.use_cache = True
-            logger.info("Gradient checkpointing disabled for DDP model.")
+            log(logger.info,"Gradient checkpointing disabled for DDP model.")
         else:
             model.config.use_cache = True
-            logger.info("Gradient checkpointing disabled.")
+            log(logger.info,"Gradient checkpointing disabled.")
     if hasattr(model, "module"):
         model.module.enable_input_require_grads()
     else:
         model.enable_input_require_grads()
 
-    logger.info("🎉 Accelerate多GPU训练配置成功！")
+    log(logger.info,"🎉 Accelerate多GPU训练配置成功！")
 
     # 开始训练
     if training_args.do_train:
-        logger.info("*** 开始训练 ***")
+        log(logger.info,"*** 开始训练 ***")
 
         # 训练循环
         model.train()
@@ -958,7 +980,7 @@ def main():
         )
 
         for epoch in range(int(training_args.num_train_epochs)):
-            logger.info(f"开始第 {epoch + 1}/{int(training_args.num_train_epochs)} 轮训练")
+            log(logger.info,f"开始第 {epoch + 1}/{int(training_args.num_train_epochs)} 轮训练")
 
             for step, batch in enumerate(train_dataloader):
                 # 针对张量并行优化的训练步骤
@@ -1024,11 +1046,13 @@ def main():
                     if completed_steps % training_args.logging_steps == 0:
                         avg_loss = total_loss / training_args.logging_steps
                         current_lr = lr_scheduler.get_last_lr()[0] if lr_scheduler else training_args.learning_rate
-                        logger.info(f"Step {completed_steps}: loss = {avg_loss:.4f}, lr = {current_lr:.2e}")
+                        log(logger.info,f"Step {completed_steps}: loss = {avg_loss:.4f}, lr = {current_lr:.2e}")
                         total_loss = 0
 
-                    # 定期保存检查点
-                    if training_args.save_steps > 0 and completed_steps % training_args.save_steps == 0:
+                    # 定期保存检查点 - 只在主进程执行
+                    if (training_args.save_steps > 0 and
+                            completed_steps % training_args.save_steps == 0 and
+                            accelerator.is_main_process):
                         output_dir = os.path.join(training_args.output_dir, f"checkpoint-{completed_steps}")
                         if model_is_distributed:
                             # 分布式模型保存
@@ -1043,7 +1067,7 @@ def main():
                             }, os.path.join(output_dir, 'training_state.pt'))
                         else:
                             accelerator.save_state(output_dir)
-                        logger.info(f"保存检查点到: {output_dir}")
+                        log(logger.info,f"保存检查点到: {output_dir}")
 
                     # 定期评估
                     if (training_args.do_eval and
@@ -1054,7 +1078,7 @@ def main():
                         eval_loss = 0
                         eval_steps = 0
 
-                        for eval_batch in eval_dataloader:
+                        for eval_batch in tqdm(eval_dataloader, desc="定期评估中"):
                             with torch.no_grad():
                                 eval_outputs = model(**eval_batch)
                                 eval_loss += eval_outputs.loss.detach().float()
@@ -1066,13 +1090,13 @@ def main():
                         except OverflowError:
                             perplexity = float("inf")
 
-                        logger.info(
+                        log(logger.info,
                             f"Step {completed_steps}: eval_loss = {avg_eval_loss:.4f}, perplexity = {perplexity:.2f}")
                         model.train()
         progress_bar.close()
 
         if accelerator.is_main_process:
-            logger.info(f"保存模型到: {training_args.output_dir}")
+            log(logger.info,f"保存模型到: {training_args.output_dir}")
 
         # 在训练结束后，恢复模型的use_cache设置
         unwrapped = get_unwrapped_model(model)
@@ -1082,7 +1106,7 @@ def main():
         # 保存模型时也需要考虑DDP包装
         if model_is_distributed:
             # 分布式模型直接保存
-            logger.info("🔧 保存分布式模型...")
+            log(logger.info,"🔧 保存分布式模型...")
             model.save_pretrained(training_args.output_dir)
             tokenizer.save_pretrained(training_args.output_dir)
         else:
@@ -1093,11 +1117,11 @@ def main():
                 # 获取原始模型（去除包装）
                 unwrapped_model = accelerator.unwrap_model(model)
                 save_model(unwrapped_model, tokenizer, training_args.output_dir)
-                logger.info("✅ 标准模型保存完成")
+                log(logger.info,"✅ 标准模型保存完成")
 
     # 最终评估
     if training_args.do_eval and eval_dataloader is not None:
-        logger.info("*** 最终评估 ***")
+        log(logger.info,"*** 最终评估 ***")
         model.eval()
         eval_loss = 0
         eval_steps = 0
@@ -1114,7 +1138,7 @@ def main():
         except OverflowError:
             perplexity = float("inf")
         if accelerator.is_main_process:
-            logger.info(f"最终评估结果: eval_loss = {avg_eval_loss:.4f}, perplexity = {perplexity:.2f}")
+            log(logger.info,f"最终评估结果: eval_loss = {avg_eval_loss:.4f}, perplexity = {perplexity:.2f}")
 
 
 if __name__ == "__main__":

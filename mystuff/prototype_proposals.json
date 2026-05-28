@@ -1,0 +1,1915 @@
+[
+  {
+    "insights": [
+      "当前库主要覆盖面向患者的症状咨询、用药指导和报告解读，但缺少医学考试/知识问答所需的概念辨析、病理生理机制、药理与生化基础知识、疾病鉴别和诊疗原则总结等能力。",
+      "basic_medicine 样本明显属于医学基础知识与概念判断，不应被映射为 symptom/drug/report 类患者问答，需要新增专门的医学知识问答 prototype。",
+      "现有 disease_education 偏科普叙述，不能充分覆盖“疾病机制/病理改变/鉴别结论/知识点正误判断”等考试型输入。",
+      "部分现有 report、disease、drug 的描述可扩展到更一般的“临床概念解释/原则判断”，减少过度依赖患者口语场景。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病或医学概念是什么、核心机制/病理改变、常见表现、常见并发问题和基本处理思路，模型需要做抽象化医学解释与概念科普，而不是直接给个体化诊疗。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展为更通用的医学概念解释，可覆盖部分基础医学和临床知识型问答。"
+      },
+      {
+        "target_prototype_id": "disease_04",
+        "prototype": {
+          "prototype_id": "disease_04",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病的严重程度、是否可自限、是否会复发、预后如何或与相似疾病如何区分，模型需要给出风险分层、常见鉴别点和就医边界。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补足考试中常见的疾病分层、预后与鉴别判断能力。"
+      },
+      {
+        "target_prototype_id": "drug_02",
+        "prototype": {
+          "prototype_id": "drug_02",
+          "task_type": "drug_guidance",
+          "description": "用户咨询药物不良反应、毒性、停药时机或用药风险，模型需要说明常见反应、严重警示反应以及何时停用或就医的原则。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将不良反应解释从“患者体验”扩展到更一般的药物安全判断。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供实验室检查结果，模型需要解释指标升高或降低的临床意义、常见病因、相关系统影响及是否需要复查或进一步检查。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对化验指标的机制与临床意义解读，适配更广泛的考试题型。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "medical_knowledge_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问医学基础概念、细胞/分子机制、信号通路、维生素或酶辅因子、病理改变等知识点，模型需要进行准确的概念解释、机制对应和正误判断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "basic_medicine 样本主要考查基础医学知识，现有库缺少专门的医学知识问答 prototype。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "medical_knowledge_02",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问常见病理过程、坏死与修复、再生与愈合、淤血与梗死等病理学概念，模型需要辨析定义、形成条件和典型特征。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中包含大量病理学概念辨析题，需单独覆盖病理过程判断能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "medical_knowledge_03",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问某类营养缺乏、代谢异常或维生素相关表现，模型需要把缺乏因素与典型临床后果、相关辅酶或病变机制对应起来。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及营养与维生素缺乏的知识点，适合单独建模。"
+      }
+    ],
+    "batch_index": 1,
+    "examples": [
+      {
+        "example_id": "basic_medicine_0",
+        "subset": "basic_medicine",
+        "question": "不属于第二信使的物质是____\n选项:\nA. cAMP\nB. cGMP\nC. $IP_3$\nD. 胰岛素",
+        "answer": "正确答案: D. 胰岛素"
+      },
+      {
+        "example_id": "basic_medicine_1",
+        "subset": "basic_medicine",
+        "question": "脱羧酶的辅酶____\n选项:\nA. 生物素\nB. 叶酸\nC. 磷酸吡哆醛\nD. 硫胺素",
+        "answer": "正确答案: C. 磷酸吡哆醛"
+      },
+      {
+        "example_id": "basic_medicine_2",
+        "subset": "basic_medicine",
+        "question": "关于湿性坏疽的描述，不正确的是____\n选项:\nA. 合并腐败菌感染\nB. 具有恶臭味\nC. 常有全身中毒症状\nD. 坏死组织与健康组织之间界限清楚",
+        "answer": "正确答案: D. 坏死组织与健康组织之间界限清楚"
+      },
+      {
+        "example_id": "basic_medicine_3",
+        "subset": "basic_medicine",
+        "question": "肺梗死形成的先决条件是____\n选项:\nA. 组织疏松\nB. 严重淤血\nC. 蛋白含量高\nD. 侧支循环不充分",
+        "answer": "正确答案: B. 严重淤血"
+      },
+      {
+        "example_id": "basic_medicine_4",
+        "subset": "basic_medicine",
+        "question": "关于维生素缺乏症的叙述，不正确的是____\n选项:\nA. 维生素A缺乏——夜盲症\nB. 维生素D缺乏——软骨病\nC. 维生素$B_1$ 缺乏——脚气病\nD. 维生素$B_6$缺乏——口角炎",
+        "answer": "正确答案: D. 维生素$B_6$缺乏——口角炎"
+      },
+      {
+        "example_id": "basic_medicine_5",
+        "subset": "basic_medicine",
+        "question": "cGMP能激活____\n选项:\nA. 磷脂酶C\nB. 蛋白激酶A\nC. 蛋白激酶G\nD. 酪氨酸蛋白激酶",
+        "answer": "正确答案: C. 蛋白激酶G"
+      },
+      {
+        "example_id": "basic_medicine_6",
+        "subset": "basic_medicine",
+        "question": "全身营养不良时，首先发生萎缩的组织或器官是____\n选项:\nA. 骨骼肌\nB. 脂肪组织\nC. 肝\nD. 脑",
+        "answer": "正确答案: B. 脂肪组织"
+      },
+      {
+        "example_id": "basic_medicine_7",
+        "subset": "basic_medicine",
+        "question": "下列愈合属于完全再生的是____\n选项:\nA. 神经修复\nB. 皮肤瘢痕\nC. 心梗后心肌修复\nD. 骨折愈合",
+        "answer": "正确答案: D. 骨折愈合"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本中出现大量医学基础知识与机制辨析题，现有库主要覆盖问诊/解释类任务，缺少对医学概念、病理生理、药理与检验原理的抽象能力描述。",
+      "CEval样本更像“知识性问答/概念辨析”，不应被描述为选择题作答，而应覆盖对医学原理、机制、病变类型、代谢途径和检验学基础的解释能力。",
+      "现有report与disease类prototype可部分覆盖“检查结果解释”，但不足以覆盖检验原理、病理机制和基础医学概念的直接问答。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "report_01",
+        "prototype": {
+          "prototype_id": "report_01",
+          "task_type": "report_interpretation",
+          "description": "用户提供血常规、血涂片或相关实验室检查结果，模型需要解释主要指标的临床含义、常见异常原因及是否需要结合症状进一步评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "扩展到更贴近考试中的基础检验学与血液学结果理解，而不只限于血常规单点指标。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供肝肾功能、电解质、酸碱相关检查结果，模型需要解释异常指标可能反映的器官功能变化、常见机制和复查建议。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对生化指标背后生理病理含义的抽象解释能力。"
+      },
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某医学概念、疾病或病理状态是什么，模型需要从定义、发生机制、典型表现、基本分类和常见临床意义进行科普式解释。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "覆盖更多基础医学概念辨析，不局限于疾病本身。"
+      },
+      {
+        "target_prototype_id": "drug_08",
+        "prototype": {
+          "prototype_id": "drug_08",
+          "task_type": "drug_guidance",
+          "description": "用户咨询药物、补充剂或治疗手段的作用原理、适应场景和使用边界，模型需要从药理机制和安全性角度给出原则性说明。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补足药理机制与适用边界的抽象表达，兼容考试中的药理基础知识。"
+      },
+      {
+        "target_prototype_id": "followup_03",
+        "prototype": {
+          "prototype_id": "followup_03",
+          "task_type": "followup_question",
+          "description": "用户只给出局部化验或检查信息时，模型需要指出无法完成准确判断，并明确请求完整数值、参考范围、单位及临床背景。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "让追问任务更适配考试样本中“信息不足需补充条件”的场景。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "basic_01",
+          "task_type": "basic_medicine_qa",
+          "description": "用户询问基础医学概念、细胞和组织病理、代谢通路、酶与辅因子、信号转导等知识点时，模型需要给出准确的机制性解释与概念辨析。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本包含大量基础医学理论题，现有库无对应抽象能力类型。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "basic_02",
+          "task_type": "basic_medicine_qa",
+          "description": "用户询问常见病理改变、坏死类型、炎症反应、器官特异性病理机制等内容时，模型需要进行病理学层面的分类、比较和机制解释。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖病毒性肝炎、坏死类型等病理学辨析类样本。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "basic_03",
+          "task_type": "basic_medicine_qa",
+          "description": "用户询问人体代谢与生理生化知识时，模型需要解释肝脏代谢功能、氮代谢、脂类代谢、血液成分和相关生理差异。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖样本中的肝脏代谢特异作用、尿素生成和血清血浆区别等内容。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "basic_04",
+          "task_type": "basic_medicine_qa",
+          "description": "用户询问内分泌与调节机制相关知识时，模型需要解释腺体功能、激素调控、缺乏状态及其对器官形态和功能的影响。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖甲状腺肿大、缺碘等内分泌与营养相关基础医学知识。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "basic_05",
+          "task_type": "basic_medicine_qa",
+          "description": "用户询问实验室方法、分子生物学技术或检验原理时，模型需要解释实验设计、关键试剂作用和结果判读逻辑。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖PCR引物长度、转氨酶辅酶等检验与实验基础知识。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "basic_06",
+          "task_type": "basic_medicine_qa",
+          "description": "用户询问细胞信号转导与第二信使机制时，模型需要解释经典通路、关键分子和下游效应。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖DAG、IP3、cAMP等信号转导相关样本。"
+      }
+    ],
+    "batch_index": 2,
+    "examples": [
+      {
+        "example_id": "basic_medicine_8",
+        "subset": "basic_medicine",
+        "question": "PCR反应中，所设计引物的长度一般为____\n选项:\nA. 5～10个核苷酸\nB. 15～30个核苷酸\nC. <50个核苷酸\nD. 长度任意",
+        "answer": "正确答案: B. 15～30个核苷酸"
+      },
+      {
+        "example_id": "basic_medicine_9",
+        "subset": "basic_medicine",
+        "question": "转氨酶的辅酶____\n选项:\nA. 生物素\nB. 叶酸\nC. 磷酸吡哆醛\nD. 硫胺素",
+        "answer": "正确答案: C. 磷酸吡哆醛"
+      },
+      {
+        "example_id": "basic_medicine_10",
+        "subset": "basic_medicine",
+        "question": "下列肝细胞坏死的病变中，病毒性肝炎最常见的病理变化是____\n选项:\nA. 溶解性坏死\nB. 嗜酸性坏死\nC. 点状坏死\nD. 碎片坏死",
+        "answer": "正确答案: A. 溶解性坏死"
+      },
+      {
+        "example_id": "basic_medicine_11",
+        "subset": "basic_medicine",
+        "question": "肝脏在脂类代谢中所特有的作用是____\n选项:\nA. 将糖转变为脂肪\nB. 由胆固醇转变为胆汁酸\nC. 生成酮体\nD. 合成磷脂",
+        "answer": "正确答案: C. 生成酮体"
+      },
+      {
+        "example_id": "basic_medicine_12",
+        "subset": "basic_medicine",
+        "question": "导致甲状腺肿大最常见的原因是____\n选项:\nA. 垂体肿瘤\nB. 缺碘\nC. 自身免疫反应\nD. 先天性疾患",
+        "answer": "正确答案: B. 缺碘"
+      },
+      {
+        "example_id": "basic_medicine_13",
+        "subset": "basic_medicine",
+        "question": "肝是生成尿素的唯一器官，是由于肝细胞含有____\n选项:\nA. 谷氨酸脱氢酶\nB. 谷丙转氨酶\nC. 谷草转氨酶\nD. 精氨酸酶",
+        "answer": "正确答案: D. 精氨酸酶"
+      },
+      {
+        "example_id": "basic_medicine_14",
+        "subset": "basic_medicine",
+        "question": "血清与血浆的区别在于血清内无____\n选项:\nA. 维生素\nB. 糖类\nC. 代谢产物\nD. 纤维蛋白原",
+        "answer": "正确答案: D. 纤维蛋白原"
+      },
+      {
+        "example_id": "basic_medicine_15",
+        "subset": "basic_medicine",
+        "question": "可直接激活蛋白激酶C的是____\n选项:\nA. cAMP\nB. cGMP\nC. $IP_3$\nD. DAG",
+        "answer": "正确答案: D. DAG"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本中大量是医学考试式单选题，核心能力不是问诊，而是医学概念辨析、机制解释、疾病诊疗原则判断与并发症/风险识别。",
+      "现有库对“疾病教育/检查解读/症状问答”覆盖较多，但缺少对基础医学知识、临床决策原则、病理机制、鉴别诊断和治疗方案选择的抽象建模。",
+      "部分临床题涉及急重症处理、心血管/消化/呼吸/肝病等通用内科决策，适合新增更通用的临床推理与治疗选择prototype，而不是继续细分成具体症状类。",
+      "对于“给出答案选项”的形式不应建模为选择题作答，而应建模为在信息约束下完成医学知识检索、概念对照和原则判断。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病或医学概念的定义、病因、病理机制、典型表现、常见并发症和基本处理原则，模型需要做抽象科普与概念辨析，而不是直接进行个体化诊疗。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展到医学考试常见的概念、机制与并发症辨析任务。"
+      },
+      {
+        "target_prototype_id": "disease_02",
+        "prototype": {
+          "prototype_id": "disease_02",
+          "task_type": "disease_education",
+          "description": "用户咨询慢性病或常见内科疾病时，模型需要解释疾病发生机制、病程演变、管理重点、常见治疗策略及生活方式干预。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对临床知识性问题的覆盖，不局限于单纯生活方式建议。"
+      },
+      {
+        "target_prototype_id": "report_05",
+        "prototype": {
+          "prototype_id": "report_05",
+          "task_type": "report_interpretation",
+          "description": "用户提供检查或影像结论时，模型需要结合常见疾病谱解释结果所提示的病理改变、临床意义、随访或进一步评估方向。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "从纯影像结论解释扩展到检查结果所对应的病理与临床意义。"
+      },
+      {
+        "target_prototype_id": "report_06",
+        "prototype": {
+          "prototype_id": "report_06",
+          "task_type": "report_interpretation",
+          "description": "用户提供的检查信息不完整时，模型需要判断哪些关键指标、参考范围、单位或临床背景缺失，并说明为何这些信息会影响结论。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "更贴近考试/临床推理中的信息缺失识别能力。"
+      },
+      {
+        "target_prototype_id": "summary_01",
+        "prototype": {
+          "prototype_id": "summary_01",
+          "task_type": "summary",
+          "description": "多轮问诊或病例信息后，模型需要将主诉、现病史、既往史、用药史、检查结果与初步判断整理为结构化病例摘要。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补充病例书写常见要素，覆盖临床医学场景。"
+      },
+      {
+        "target_prototype_id": "summary_03",
+        "prototype": {
+          "prototype_id": "summary_03",
+          "task_type": "summary",
+          "description": "模型需要将症状、体征、检查结果和治疗信息整合成简洁的临床病历摘要，突出关键异常、问题列表和当前处理。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "把摘要能力从简单拼接提升为临床要点归纳。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "knowledge_01",
+          "task_type": "medical_knowledge",
+          "description": "用户询问基础医学概念、细胞病理改变、信号通路、病理生理机制或病因学判断，模型需要进行知识性辨析和机制解释。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本包含大量基础医学理论题，现有task_type没有覆盖这类非问诊知识辨析任务。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "diagnosis_01",
+          "task_type": "diagnostic_reasoning",
+          "description": "用户提供病例信息后，模型需要在多个疾病或病理状态之间进行鉴别判断，基于典型特征、病程、检查结果和排除线索给出最可能方向。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "补充临床考试中的鉴别诊断能力，区别于泛泛的症状问答。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "treatment_01",
+          "task_type": "treatment_decision",
+          "description": "用户询问某类疾病的治疗方案、分层处理、首选措施或禁忌措施，模型需要依据通行临床原则判断适宜的治疗策略。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "样本中有大量治疗方案选择题，需要独立覆盖临床决策判断。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "complication_01",
+          "task_type": "complication_risk",
+          "description": "用户询问某疾病最常见并发症、危险并发后果或病情进展风险，模型需要识别高频并发症及其临床意义。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补充并发症识别这一高频考试能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "emergency_01",
+          "task_type": "emergency_management",
+          "description": "用户提供危急病情或血气、意识、呼吸循环异常等信息时，模型需要判断是否存在急性失代偿并指出不适宜或需要避免的处置。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "覆盖急重症处理原则判断，尤其是呼吸衰竭、昏迷等题型。"
+      }
+    ],
+    "batch_index": 3,
+    "examples": [
+      {
+        "example_id": "basic_medicine_16",
+        "subset": "basic_medicine",
+        "question": "下列哪项原因不引起萎缩____\n选项:\nA. 肾盂积水\nB. 慢性肝淤血\nC. 垂体功能低下\nD. 四氯化碳中毒",
+        "answer": "正确答案: D. 四氯化碳中毒"
+      },
+      {
+        "example_id": "basic_medicine_17",
+        "subset": "basic_medicine",
+        "question": "以$IP_3$和DAG为第二信使的双信号途径是____\n选项:\nA. cAMP-蛋白激酶途径\nB. $Ca^{2+}$-磷脂依赖性蛋白激酶途径\nC. cGMP-蛋白激酶途径\nD. 酪氨酸蛋白激酶途径",
+        "answer": "正确答案: B. $Ca^{2+}$-磷脂依赖性蛋白激酶途径"
+      },
+      {
+        "example_id": "basic_medicine_18",
+        "subset": "basic_medicine",
+        "question": "乙型脑炎的特征性病变是____\n选项:\nA. 血管淋巴套形成\nB. 软化灶形成\nC. 胶质细胞增生\nD. 卫星现象",
+        "answer": "正确答案: B. 软化灶形成"
+      },
+      {
+        "example_id": "clinical_medicine_0",
+        "subset": "clinical_medicine",
+        "question": "附睾精液囊肿____\n选项:\nA. 精子自附睾管溢出至周围组织形成的囊肿\nB. 睾丸网或输出小管扩张形成囊肿，囊肿液中可见精子或精子碎片\nC. 囊肿为质硬的圆形包块\nD. 囊肿与周围组织界限不清",
+        "answer": "正确答案: B. 睾丸网或输出小管扩张形成囊肿，囊肿液中可见精子或精子碎片"
+      },
+      {
+        "example_id": "clinical_medicine_1",
+        "subset": "clinical_medicine",
+        "question": "有关非ST段抬高心肌梗死的治疗方案，以下哪项正确____\n选项:\nA. 溶栓是基础治疗\nB. 低危险组不必使用药物\nC. 中危险组以阿司匹林和肝素尤其是低分子量肝素治疗为主\nD. 高危险组以介入治疗为首选",
+        "answer": "正确答案: D. 高危险组以介入治疗为首选"
+      },
+      {
+        "example_id": "clinical_medicine_2",
+        "subset": "clinical_medicine",
+        "question": "慢性胃溃疡最常见的并发症是____\n选项:\nA. 幽门狭窄\nB. 穿孔\nC. 出血\nD. 癌变",
+        "answer": "正确答案: C. 出血"
+      },
+      {
+        "example_id": "clinical_medicine_3",
+        "subset": "clinical_medicine",
+        "question": "男性，65岁。昏迷10小时。血气分析：$pH$ 7．26，$PaCO_2$82mmHg，$PaO_2$ 45mmHg。下列哪项处理不适宜____\n选项:\nA. 机械通气\nB. 呼吸兴奋剂\nC. 支持疗法\nD. 高浓度给氧",
+        "answer": "正确答案: D. 高浓度给氧"
+      },
+      {
+        "example_id": "clinical_medicine_4",
+        "subset": "clinical_medicine",
+        "question": "与肝癌发病无关的因素是____\n选项:\nA. 甲型肝炎\nB. 乙型肝炎\nC. 酒精性肝硬化\nD. 坏死后性肝硬化",
+        "answer": "正确答案: A. 甲型肝炎"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "这批样本明显覆盖了医学考试中的概念辨析、病因机制、病理生理、诊疗决策与禁忌判断，现有库偏向患者问答，需要补充“医学知识判断/考试型解释”能力。",
+      "部分题目涉及特定疾病或状态下的治疗选择、禁忌和风险分层，适合在现有 disease_education、triage、drug_guidance 基础上细化。",
+      "存在对呼吸衰竭、心肌梗死后溶栓、糖尿病酮症酸中毒、洋地黄中毒等病理生理与治疗原则的考查，现有 prototype 中缺少能覆盖这类临床决策推理的抽象能力。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病或临床综合征的定义、病因、病理生理、常见表现、并发症及基本处理原则，模型需要进行医学概念辨析和基础科普，而不是给出具体个体化处方。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展为更适合医学考试与临床概念题的抽象能力，覆盖病理生理和并发症等内容。"
+      },
+      {
+        "target_prototype_id": "disease_03",
+        "prototype": {
+          "prototype_id": "disease_03",
+          "task_type": "disease_education",
+          "description": "用户询问感染性疾病的传播方式、病原学特点、病理改变、预防隔离和一般治疗原则，模型需要进行感染医学知识解释并避免夸大风险。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中有病毒性肺炎等病理识别内容，需把感染知识从纯传播科普扩展到病理与原则。"
+      },
+      {
+        "target_prototype_id": "triage_01",
+        "prototype": {
+          "prototype_id": "triage_01",
+          "task_type": "triage",
+          "description": "用户描述胸痛、胸闷、呼吸困难、低血压、发绀或心肺功能不稳定表现，模型需要识别危重症并优先建议急诊评估、监护或进一步处置。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "补充呼吸衰竭与循环不稳定等重症识别，覆盖更广泛的临床急症判断。"
+      },
+      {
+        "target_prototype_id": "triage_03",
+        "prototype": {
+          "prototype_id": "triage_03",
+          "task_type": "triage",
+          "description": "用户描述持续高热、寒战、意识改变、呼吸衰竭、休克或明显代谢紊乱相关表现，模型需要识别严重感染和全身危重状态并建议及时就医。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "增强对严重感染、脓毒症相关危象和代谢失代偿的识别能力。"
+      },
+      {
+        "target_prototype_id": "drug_02",
+        "prototype": {
+          "prototype_id": "drug_02",
+          "task_type": "drug_guidance",
+          "description": "用户咨询药物不良反应、毒性表现、药物中毒后的处理原则及停药时机，模型需要区分常见副作用与需紧急处置的严重反应，并提示遵医嘱。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及洋地黄中毒等药物毒性知识，需将不良反应能力扩展到中毒识别与处理原则。"
+      },
+      {
+        "target_prototype_id": "drug_03",
+        "prototype": {
+          "prototype_id": "drug_03",
+          "task_type": "drug_guidance",
+          "description": "用户同时使用多种药物，咨询联合用药是否合适、是否存在相互作用、重复用药或禁忌组合，模型需要提醒风险并建议核对医嘱和用药清单。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "可覆盖临床考试中常见的联合用药禁忌与相互作用判断。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供血气、肝肾功能或电解质等检验结果，模型需要解释关键指标的异常意义、相关病理生理提示及是否需要紧急处理或复查。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补充血气分析与酸碱失衡解释，覆盖呼吸衰竭和代谢紊乱相关题型。"
+      },
+      {
+        "target_prototype_id": "report_05",
+        "prototype": {
+          "prototype_id": "report_05",
+          "task_type": "report_interpretation",
+          "description": "用户上传或描述影像、病理或检查结论文字，模型需要对结论进行基础医学解释，帮助理解其临床意义、可能诊断方向和随访建议。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中存在病理与影像式概念判断，需将报告解读扩展到病理/检查结论。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "exam_01",
+          "task_type": "medical_exam_reasoning",
+          "description": "用户给出医学考试或临床考题形式的问题，模型需要基于医学知识进行概念辨析、机制推理和最佳选项判断，重点考查病理生理、诊断要点与治疗原则。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "现有库缺少专门覆盖医学考试题的抽象任务类型，这批样本大量属于此类知识推理。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "exam_02",
+          "task_type": "medical_exam_reasoning",
+          "description": "用户询问某种疾病状态下何种治疗、药物或操作最合适或不适合，模型需要从适应证、禁忌证和风险机制角度做临床决策判断。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "样本中存在具体治疗策略选择和禁忌判断，区别于一般科普，需要新增决策型能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "exam_03",
+          "task_type": "medical_exam_reasoning",
+          "description": "用户询问呼吸系统危重状态的病理生理、血气改变及氧疗或通气策略，模型需要解释通气不足、缺氧和二氧化碳潴留相关机制并判断处理原则。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "样本包含急性/Ⅱ型呼吸衰竭相关考点，现有 triage 不足以覆盖机制与处置原则。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "exam_04",
+          "task_type": "medical_exam_reasoning",
+          "description": "用户询问心血管急症、溶栓、抗凝或心律失常相关知识，模型需要结合药物史、病情阶段和风险判断治疗选择。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "样本涉及心肌梗死后溶栓及相关治疗选择，适合单独抽象为心血管决策推理。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "exam_05",
+          "task_type": "medical_exam_reasoning",
+          "description": "用户询问代谢急症的实验室特征、诊断要点和处理原则，如酮症、酸碱失衡或电解质紊乱，模型需要进行机制解释与鉴别判断。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "样本中有糖尿病酮症酸中毒等典型代谢急症知识点，需单独覆盖。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "exam_06",
+          "task_type": "medical_exam_reasoning",
+          "description": "用户询问药物中毒、药物相关电解质异常或特殊药物使用条件下的并发症，模型需要识别常见诱因、危险后果与处理方向。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "可覆盖洋地黄中毒合并低钾等药理与病理生理交叉考点。"
+      }
+    ],
+    "batch_index": 4,
+    "examples": [
+      {
+        "example_id": "clinical_medicine_5",
+        "subset": "clinical_medicine",
+        "question": "某患者，5月前曾进行链激酶治疗心肌梗死，现出现大面积肺血栓栓塞症，应该如何治疗____\n选项:\nA. 继续使用链激酶溶栓\nB. 用尿激酶溶栓\nC. 严禁用任何的溶栓药\nD. 立刻使用负荷量的华法林",
+        "answer": "正确答案: B. 用尿激酶溶栓"
+      },
+      {
+        "example_id": "clinical_medicine_6",
+        "subset": "clinical_medicine",
+        "question": "不符合病毒性肺炎描述的是____\n选项:\nA. 病灶可呈小叶性分布\nB. 肺泡腔内有大量渗出物\nC. 可有透明膜形成\nD. 肉眼观病变不明显",
+        "answer": "正确答案: B. 肺泡腔内有大量渗出物"
+      },
+      {
+        "example_id": "clinical_medicine_7",
+        "subset": "clinical_medicine",
+        "question": "基底细胞癌最常见的好发部位是____\n选项:\nA. 小阴唇\nB. 前庭\nC. 阴蒂\nD. 大阴唇",
+        "answer": "正确答案: D. 大阴唇"
+      },
+      {
+        "example_id": "clinical_medicine_8",
+        "subset": "clinical_medicine",
+        "question": "急性呼吸衰竭最早出现的症状是____\n选项:\nA. 发绀\nB. 呼吸困难\nC. 精神错乱\nD. 心动过速",
+        "answer": "正确答案: B. 呼吸困难"
+      },
+      {
+        "example_id": "clinical_medicine_9",
+        "subset": "clinical_medicine",
+        "question": "Ⅱ型呼吸衰竭不能给予高浓度吸氧的原因主要是____\n选项:\nA. 伴$CO_2$潴留\nB. 诱发呼吸性碱中毒\nC. 降低了颈动脉体、主动脉体的兴奋性\nD. 可引起氧中毒",
+        "answer": "正确答案: C. 降低了颈动脉体、主动脉体的兴奋性"
+      },
+      {
+        "example_id": "clinical_medicine_10",
+        "subset": "clinical_medicine",
+        "question": "洋地黄中毒合并低钾血症时易发生的心律失常是____\n选项:\nA. 阵发性房性心动过速伴传导阻滞\nB. 房性期前收缩\nC. 房颤\nD. 室颤",
+        "answer": "正确答案: A. 阵发性房性心动过速伴传导阻滞"
+      },
+      {
+        "example_id": "clinical_medicine_11",
+        "subset": "clinical_medicine",
+        "question": "下列哪项不符合糖尿病酮症酸中毒的实验室检查结果____\n选项:\nA. pH＜7．35\nB. 血酮体＞4．8mmol／L\nC. 血糖多＞33．3mmol／L\nD. 血白细胞计数＞10×10^9 ／L",
+        "answer": "正确答案: C. 血糖多＞33．3mmol／L"
+      },
+      {
+        "example_id": "clinical_medicine_12",
+        "subset": "clinical_medicine",
+        "question": "男性，70岁。慢性阻塞性肺病史20余年，神志不清5小时。体检：发绀，呼吸浅促，心率：120次／分，律齐，两肺闻及干湿啰音。血压75／45mmHg。血pH7．18，$PaCO_2$ 5mmHg，$PaO_2$ 49mmHg。此时哪项治疗措施不适宜____\n选项:\nA. 呼吸机辅助通气\nB. 纠正低血压\nC. 持续低浓度吸氧\nD. 呼吸兴奋剂",
+        "answer": "正确答案: A. 呼吸机辅助通气"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "现有库对日常问诊与检查解读覆盖较好，但对医学考试型知识问答覆盖不足，尤其是疾病机制、病理/病理生理、鉴别诊断和治疗原则类单选题能力。",
+      "样本中大量问题并非患者咨询，而是对医学概念、典型体征、并发症、实验室异常和疾病分类的知识辨析，适合新增“医学知识问答/概念辨析”类prototype。",
+      "部分既有report与disease prototype可以适度泛化，覆盖更广的临床知识解释与鉴别，但无需过度细分到具体题面。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病的定义、发病机制、典型表现、常见并发症、病理特点或诊疗原则，模型需要做抽象层面的医学科普与概念解释，不直接下个体化诊断。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "补足考试题中常见的疾病机制、病理与临床特点类知识问答，提升抽象概念解释覆盖面。"
+      },
+      {
+        "target_prototype_id": "disease_02",
+        "prototype": {
+          "prototype_id": "disease_02",
+          "task_type": "disease_education",
+          "description": "用户咨询慢性病或常见疾病的管理重点、典型并发症、危险因素、分型差异和长期随访原则，模型需要解释疾病管理与风险分层。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将慢病管理扩展为更一般的临床知识解释，覆盖并发症和分型辨析。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供实验室检查结果，模型需要结合指标升降解释其临床意义、可能提示的病理生理变化、常见鉴别方向以及是否需要复查或进一步评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中包含大量血液学、电解质与生化异常的考点，需要从单纯数值解释扩展到病理生理和鉴别判断。"
+      },
+      {
+        "target_prototype_id": "report_05",
+        "prototype": {
+          "prototype_id": "report_05",
+          "task_type": "report_interpretation",
+          "description": "用户提供影像、病理或专科检查的结论性文字，模型需要解释其核心含义、常见鉴别诊断、典型相关疾病和下一步处理思路。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补足影像/病理结论类考试题和临床报告题的抽象解释能力。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "knowledge_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问医学基础知识、疾病分类、典型体征、常见并发症、危险因素或高频考点，模型需要直接给出准确的知识性回答并简要说明依据。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "CEval样本大量是纯医学知识点问答，现有问诊型prototype难以覆盖，需要新增通用知识问答能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_02",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问病理学、病理生理或疾病机制相关问题，模型需要解释异常机制、组织/器官受累特点及其临床后果。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及白血病浸润、肿瘤类型、疾病机制等内容，需要专门覆盖机制解释。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_03",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问鉴别诊断、最相似疾病、易混淆表现或最典型/最少见特征，模型需要进行对比辨析并指出关键区分点。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中有大量‘最易混淆’‘最少见’‘最常见’类辨析题，适合单独建模。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_04",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问治疗原则、关键并发症处理、急危重症纠正要点或用药相关病理生理基础，模型需要回答核心处理策略而非个体处方。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "如DKA电解质紊乱等治疗关键点属于考试高频临床决策知识，需独立覆盖。"
+      }
+    ],
+    "batch_index": 5,
+    "examples": [
+      {
+        "example_id": "clinical_medicine_13",
+        "subset": "clinical_medicine",
+        "question": "女性，29岁，因牙龈渗血伴低热1周入院，实验室检查血常规：白细胞11．3×10^9 ／L、红细胞2．6×10^12 ／L、 血红蛋白68g／L、血小板30×10^9 ／L，骨髓穿刺结果提示急性单核细胞白血病(M5)，以下哪个体征最少见____\n选项:\nA. 牙龈肿胀\nB. 胸骨压痛\nC. 肝辟肿大\nD. 巩膜黄染",
+        "answer": "正确答案: D. 巩膜黄染"
+      },
+      {
+        "example_id": "clinical_medicine_14",
+        "subset": "clinical_medicine",
+        "question": "早期胃癌最多见的类型是____\n选项:\nA. 隆起型\nB. 表浅型\nC. 凹陷型\nD. 表浅平坦型",
+        "answer": "正确答案: C. 凹陷型"
+      },
+      {
+        "example_id": "clinical_medicine_15",
+        "subset": "clinical_medicine",
+        "question": "最易和肺转移癌相混淆的是____\n选项:\nA. 中央型肺癌\nB. 周围型肺癌\nC. 弥漫型肺癌\nD. 大细胞肺癌",
+        "answer": "正确答案: C. 弥漫型肺癌"
+      },
+      {
+        "example_id": "clinical_medicine_16",
+        "subset": "clinical_medicine",
+        "question": "治疗糖尿病酮症酸中毒时最应注意的电解质紊乱是____\n选项:\nA. 低钠血症\nB. 低钾血症\nC. 高氯血症\nD. 高钙血症",
+        "answer": "正确答案: B. 低钾血症"
+      },
+      {
+        "example_id": "clinical_medicine_17",
+        "subset": "clinical_medicine",
+        "question": "硅尘可导致硅沉着病，其中致病力最强的硅尘颗粒直径为____\n选项:\nA. ＞5μm\nB. 4～5μm\nC. 2～3／μm\nD. 1～2μm",
+        "answer": "正确答案: D. 1～2μm"
+      },
+      {
+        "example_id": "clinical_medicine_18",
+        "subset": "clinical_medicine",
+        "question": "X线片上最易与周同型肺癌相混淆的肺结核病是____\n选项:\nA. 结核球\nB. 原发综合征\nC. 局灶型肺结核\nD. 结核性胸膜炎",
+        "answer": "正确答案: A. 结核球"
+      },
+      {
+        "example_id": "clinical_medicine_19",
+        "subset": "clinical_medicine",
+        "question": "风湿性心脏瓣膜病最常受累的瓣膜是____\n选项:\nA. 二尖瓣\nB. 三尖瓣\nC. 肺动脉瓣\nD. 主动脉瓣",
+        "answer": "正确答案: A. 二尖瓣"
+      },
+      {
+        "example_id": "clinical_medicine_20",
+        "subset": "clinical_medicine",
+        "question": "急性粒细胞性白血病时，瘤细胞在骨膜下浸润，聚集成肿块，称为____\n选项:\nA. 棕色瘤\nB. 黄色瘤\nC. 绿色瘤\nD. Wilms瘤",
+        "answer": "正确答案: C. 绿色瘤"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本主要覆盖医学基础知识与临床概念辨析，现有库中对“疾病教育/检查解读”偏生活化，需补充考试型医学知识问答能力。",
+      "存在大量需要在多个相近概念中做鉴别、判断最符合/最不符合、识别典型表现或检查意义的任务，现有prototype没有专门覆盖。",
+      "部分样本涉及基础医学常识、营养学与生理学基础知识，不属于典型症状咨询或报告解读。",
+      "少量样本属于病理/检验/影像/诊疗原则层面的专业判断，适合保留在中低风险知识问答类而非急症分诊。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某医学概念、疾病或综合征的定义、核心特征、典型表现、常见病因及基本鉴别点，模型需要进行抽象化医学知识讲解而不是个体化诊疗。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展到考试样本中常见的疾病/概念辨析与定义类问题。"
+      },
+      {
+        "target_prototype_id": "report_01",
+        "prototype": {
+          "prototype_id": "report_01",
+          "task_type": "report_interpretation",
+          "description": "用户提供血液、骨髓或相关实验室检查信息，模型需要解释其在诊断、代偿、分型或病理生理上的含义，并指出哪些结果支持或不支持某种机制。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将血常规扩展为更广义的血液学与骨髓代偿解释，覆盖骨髓增生/溶血等考试点。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供生化、功能或体液检查结果，模型需要解释异常结果的临床意义、常见病因及与疾病机制的关系，并提示是否需进一步评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对胸腔积液类型、代谢与器官功能相关判断的覆盖。"
+      },
+      {
+        "target_prototype_id": "disease_02",
+        "prototype": {
+          "prototype_id": "disease_02",
+          "task_type": "disease_education",
+          "description": "用户咨询常见内科疾病、代谢性疾病或慢病的病因、临床表现、并发症、分型及管理原则，模型需要给出机制化科普与基础诊疗思路。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补足慢病与内科基础知识的机制/分型/并发症表达。"
+      },
+      {
+        "target_prototype_id": "disease_04",
+        "prototype": {
+          "prototype_id": "disease_04",
+          "task_type": "disease_education",
+          "description": "用户询问某医学表现是否典型、是否符合某病、是否属于常见并发症或特殊类型，模型需要进行鉴别判断并说明关键依据。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖“最可能/不可能/典型表现”这类考试式鉴别判断任务。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "knowledge_01",
+          "task_type": "disease_education",
+          "description": "用户咨询基础医学或临床医学中的概念、机制、病理生理、营养学、生理学或检验学常识，模型需要给出准确的知识性解释和必要的对比区分。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "样本包含能量供给、生理/病理基础与一般医学常识，现有库未单独覆盖。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_02",
+          "task_type": "disease_education",
+          "description": "用户提供多个相近医学选项或相似表现，要求判断最符合、最不符合、不是、除外等，模型需要进行医学概念辨析和排除式判断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "考试题中高频出现否定式和排除式判断，适合独立抽象为概念辨析任务。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_03",
+          "task_type": "report_interpretation",
+          "description": "用户询问检查结果背后所反映的病理机制、组织学改变或疾病分型依据，模型需要结合医学知识解释检查与机制之间的对应关系。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖骨髓代偿、种植转移、胸腔积液性质等更偏机制解释的报告/检查类题目。"
+      }
+    ],
+    "batch_index": 6,
+    "examples": [
+      {
+        "example_id": "clinical_medicine_21",
+        "subset": "clinical_medicine",
+        "question": "下列哪项检查不是反映慢性溶血性贫血时骨髓代偿增生的证据____\n选项:\nA. 骨髓代偿增生\nB. 末梢血出现幼红细胞\nC. 骨髓幼红细胞增生活跃\nD. 外周血涂片发现红细胞碎片",
+        "answer": "正确答案: D. 外周血涂片发现红细胞碎片"
+      },
+      {
+        "example_id": "physician_0",
+        "subset": "physician",
+        "question": "患者的下列哪种表现有可能不是因为焦虑引起的？____\n选项:\nA. 敏感多疑\nB. 丢三落四\nC. 手心出汗\nD. 失眠",
+        "answer": "正确答案: A. 敏感多疑"
+      },
+      {
+        "example_id": "physician_1",
+        "subset": "physician",
+        "question": "与亚急性甲状腺炎有关的症状为____\n选项:\nA. 肌无力\nB. 干燥综合征\nC. 发热伴甲状腺肿痛\nD. 皮肤紫瘴",
+        "answer": "正确答案: C. 发热伴甲状腺肿痛"
+      },
+      {
+        "example_id": "physician_2",
+        "subset": "physician",
+        "question": "约60%足月儿和80%以上的早产儿可于生后____\n选项:\nA. 生后1～2天出现黄疸\nB. 生后2～3天出现黄疸\nC. 生后2～4天出现黄疸\nD. 生后2～5天出现黄疸",
+        "answer": "正确答案: D. 生后2～5天出现黄疸"
+      },
+      {
+        "example_id": "physician_3",
+        "subset": "physician",
+        "question": "给胃癌患者实施直肠指诊检查的目的是了解有无____\n选项:\nA. 种植转移\nB. 淋巴转移\nC. 血行转移\nD. 直接浸润",
+        "answer": "正确答案: A. 种植转移"
+      },
+      {
+        "example_id": "physician_4",
+        "subset": "physician",
+        "question": "充血性心力衰竭所产生的胸腔积液为____\n选项:\nA. 漏出液\nB. 渗出液\nC. 脓性胸液\nD. 血性胸液",
+        "answer": "正确答案: A. 漏出液"
+      },
+      {
+        "example_id": "physician_5",
+        "subset": "physician",
+        "question": "有排石史，发现左肾内有一直径0.4cm的结石，首选____\n选项:\nA. 观察，多饮水\nB. 体外冲击波碎石\nC. 输尿管镜取石碎石术\nD. 开放手术",
+        "answer": "正确答案: A. 观察，多饮水"
+      },
+      {
+        "example_id": "physician_6",
+        "subset": "physician",
+        "question": "食物中每克碳水化合物、脂肪和蛋白质可供给能量(kcal)分别为____\n选项:\nA. 4，9，4\nB. 9，4，4\nC. 4，9，9\nD. 9，9，4",
+        "answer": "正确答案: A. 4，9，4"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本中存在大量医学基础知识、法规与机制辨析类题目，现有库主要覆盖问诊式SFT任务，缺少考试/知识问答抽象能力。",
+      "部分题目要求在多个选项中识别错误项、排除不可能诊断或判断病因机制，适合新增“概念辨析/鉴别判断/机制解释”类prototype。",
+      "医疗法规、输血政策、重大医疗过失报告等内容不属于现有症状/疾病科普范畴，建议单独补充法规制度类能力。",
+      "部分病理生理与产科、新生儿、感染基础知识题目可通过扩展既有 disease_01 / disease_04，但为覆盖考试样本，新增更通用的医学基础知识prototype更合适。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问疾病、病因、发病机制、典型表现、并发症或常见诊疗思路，模型需要做面向医学知识的基础科普，并能解释关键概念之间的区别，而不是直接给出个体化诊疗。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "将疾病科普扩展为更通用的医学知识解释，覆盖基础机制与概念辨析类题目。"
+      },
+      {
+        "target_prototype_id": "disease_04",
+        "prototype": {
+          "prototype_id": "disease_04",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病是否可能、是否严重、是否会复发或与其他疾病如何区分，模型需要进行风险分层、可能性判断和鉴别思路说明，避免过度确定。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补强鉴别判断能力，适配考试中常见的‘哪项不可能/错误’类疾病判断。"
+      },
+      {
+        "target_prototype_id": "report_05",
+        "prototype": {
+          "prototype_id": "report_05",
+          "task_type": "report_interpretation",
+          "description": "用户提供影像、病理或其他检查文字结论，模型需要提炼核心异常、解释其临床意义，并提示下一步随访或进一步检查方向。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将报告解读覆盖到病理/专科结论，不局限于影像文字结论。"
+      },
+      {
+        "target_prototype_id": "followup_03",
+        "prototype": {
+          "prototype_id": "followup_03",
+          "task_type": "followup_question",
+          "description": "用户咨询检查结果但缺少关键上下文，模型需要先说明信息不足并索取完整指标、参考范围、临床背景或原始结论，以便进一步判断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对考试或临床简题中不完整信息的补充需求表达。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "med_basic_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问医学基础概念、病原学、病理生理、解剖生理或疾病机制，模型需要进行准确的知识性解释和概念区分。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "覆盖病毒结构、病原体特征、疾病机制等基础医学知识题。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_basic_02",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户给出多个医学选项并要求判断哪项正确或错误，模型需要进行概念辨析、排除干扰项并给出最符合医学知识的结论。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖大量单选/判断式考试题的核心能力，不应写成选择题作答而应抽象为概念辨析。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_basic_03",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问产科、新生儿、儿科常见医学知识中的机制、诊断可能性或并发症特点，模型需要基于医学常识进行准确判断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖胎盘早剥、前置胎盘、新生儿黄疸等基础临床知识题。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_basic_04",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问医院管理、医疗法规、执业规范、报告义务或输血收费等制度性问题，模型需要基于规则性知识进行准确说明。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖重大医疗过失报告、用血费用等法规制度类题目。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_basic_05",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问肿瘤转移、感染致病、病理表现或器官受累规律等医学知识，模型需要解释常见转移路径、病原学特征和典型病理规律。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖肿瘤转移与病原学辨析等综合医学知识题。"
+      }
+    ],
+    "batch_index": 7,
+    "examples": [
+      {
+        "example_id": "physician_7",
+        "subset": "physician",
+        "question": "裸露病毒体的结构中不包括____\n选项:\nA. DNA\nB. RNA\nC. 衣壳\nD. 包膜",
+        "answer": "正确答案: D. 包膜"
+      },
+      {
+        "example_id": "physician_8",
+        "subset": "physician",
+        "question": "胎盘早剥发生产后出血的原因____\n选项:\nA. 子宫下段组织脆弱收缩力差\nB. 子宫下段血运丰富\nC. 两者均有关\nD. 两者均无关",
+        "answer": "正确答案: D. 两者均无关"
+      },
+      {
+        "example_id": "physician_9",
+        "subset": "physician",
+        "question": "前置胎盘发生产后出血的原因____\n选项:\nA. 子宫下段组织脆弱收缩力差\nB. 子宫下段血运丰富\nC. 两者均有关\nD. 两者均无关",
+        "answer": "正确答案: C. 两者均有关"
+      },
+      {
+        "example_id": "physician_10",
+        "subset": "physician",
+        "question": "足月儿出生7天后出现黄疸，下列哪项诊断是不可能的____\n选项:\nA. 败血症\nB. ABO溶血病\nC. 新生儿肺炎\nD. 胆道闭锁",
+        "answer": "正确答案: B. ABO溶血病"
+      },
+      {
+        "example_id": "physician_11",
+        "subset": "physician",
+        "question": "下列哪项不是医疗机构应当在12小时内向当地卫生行政部门报告的重大医疗过失行为____\n选项:\nA. 发生死亡的\nB. 有重度残疾的\nC. 有中度残疾的\nD. 同时二人人身损害后果的",
+        "answer": "正确答案: D. 同时二人人身损害后果的"
+      },
+      {
+        "example_id": "physician_12",
+        "subset": "physician",
+        "question": "公民在医院就医需要用血时，只需交付的费用包括____\n选项:\nA. 用于血液的采集、储存、分离、检验等费用\nB. 用于血液的包装、储存、运输费用\nC. 医院为患者输血过程所产生的费用\nD. 血液采供血的费用和血液的价格 行政部门会同国务院价格主管部门制定。",
+        "answer": "正确答案: A. 用于血液的采集、储存、分离、检验等费用"
+      },
+      {
+        "example_id": "physician_13",
+        "subset": "physician",
+        "question": "不能引起肺部化脓性病变的病原体是____\n选项:\nA. 金黄色葡萄球菌\nB. 肺炎杆菌\nC. 肺炎球菌\nD. 嗜肺性军团杆菌",
+        "answer": "正确答案: C. 肺炎球菌"
+      },
+      {
+        "example_id": "physician_14",
+        "subset": "physician",
+        "question": "关于肿瘤的转移错误的是____\n选项:\nA. 胃癌可转移至盆腔\nB. 乳癌可转移至锁骨上淋巴结\nC. 交界性肿瘤不出现转移\nD. 肝癌可出现脑转移",
+        "answer": "正确答案: C. 交界性肿瘤不出现转移"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "这批样本明显包含医学基础知识问答、机制/概念辨析、诊疗禁忌与处置原则、儿科发育与用药知识等考试型任务，现有库主要覆盖患者咨询类场景，需补充“医学知识问答/概念辨析”能力。",
+      "部分样本涉及急症救治与抢救策略、用药速度/剂量/特殊操作禁忌，适合新增更通用的临床决策与急救处置原型，而不是仅限症状分诊。",
+      "现有drug/report/symptom类原型可适度扩展描述，使其覆盖‘药理机制、临床操作禁忌、检查指标与病理生理解释’等更贴近CEval考试题的抽象任务。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "drug_01",
+        "prototype": {
+          "prototype_id": "drug_01",
+          "task_type": "drug_guidance",
+          "description": "用户咨询药物的用法、用量、服药时间、漏服处理、疗程与基础注意事项，模型需要给出安全、简明的通用用药指导。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展到更一般的用药方案理解，覆盖考试中常见的服药规则与疗程判断。"
+      },
+      {
+        "target_prototype_id": "drug_02",
+        "prototype": {
+          "prototype_id": "drug_02",
+          "task_type": "drug_guidance",
+          "description": "用户咨询药物不良反应、禁忌、停药时机或药物安全性，模型需要区分常见反应与严重警示反应，并提示必要时就医。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补强药物安全与禁忌辨析，适配更多药理与临床判断题。"
+      },
+      {
+        "target_prototype_id": "drug_03",
+        "prototype": {
+          "prototype_id": "drug_03",
+          "task_type": "drug_guidance",
+          "description": "用户同时使用多种药物，咨询能否联用、先后顺序、相互作用和冲突风险，模型需要强调药物联用的安全边界与专业评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将“是否能一起吃”扩展为更通用的药物相互作用与联用安全判断。"
+      },
+      {
+        "target_prototype_id": "drug_06",
+        "prototype": {
+          "prototype_id": "drug_06",
+          "task_type": "drug_guidance",
+          "description": "用户咨询特殊人群的用药注意事项，包括老年人、肝肾功能异常、营养不良或合并基础病患者，模型需要强调剂量调整、风险评估和谨慎用药。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "样本与考试题常涉及特殊人群药物/营养相关知识，需更通用地覆盖剂量与风险调整。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供生化检查结果，模型需要解释肝肾功能、电解质等指标异常的常见意义、可能原因及是否需要复查或进一步评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补充电解质与生化指标的病理生理解释，覆盖补钾、缺氧相关等知识题背景。"
+      },
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某种疾病、病理状态或医学概念的定义、病因、发病机制、典型表现和基本处理思路，模型需要进行基础医学科普而非个体化诊疗。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "从单纯疾病科普扩展到医学概念和机制解释，更贴近基础医学考试题。"
+      },
+      {
+        "target_prototype_id": "triage_03",
+        "prototype": {
+          "prototype_id": "triage_03",
+          "task_type": "triage",
+          "description": "用户描述高热、寒战、意识改变、脱水、呼吸循环不稳或其他全身状态恶化表现，模型需要优先识别重症感染和急危重症风险并建议及时就医。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "将严重感染扩展为更广义的全身恶化/急危重症识别，适配急救处置类题目。"
+      },
+      {
+        "target_prototype_id": "summary_03",
+        "prototype": {
+          "prototype_id": "summary_03",
+          "task_type": "summary",
+          "description": "模型需要将症状、检查结果、用药史和关键医学判断整合成简洁病例摘要，突出已知信息、异常点和待进一步确认内容。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对考试/病例材料式输入的结构化整合能力。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "knowledge_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户提出基础医学或临床医学知识问答，涉及疾病定义、病因、发病机制、典型表现、分类与鉴别等，模型需要基于医学常识给出准确简洁的概念性回答。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "现有库缺少对CEval中大量纯知识问答题的覆盖，这是最主要的新任务类型。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_02",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问诊疗原则、操作选择、处置禁忌或抢救策略，模型需要从临床逻辑出发判断最合适的处理方式，并避免给出不安全建议。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "覆盖‘确诊前禁忌处置’、‘最佳抢救措施’等临床决策型考试题。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_03",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问药理、维生素、补充治疗或特殊治疗的协同机制、适用原则和安全注意事项，模型需要解释基本原理与临床应用逻辑。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖药理与营养治疗协同、机制类题目。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_04",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问儿科发育、儿童生理特点或儿童常见医学知识，模型需要基于年龄阶段给出发育里程碑、用药与照护相关的基础解释。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补足儿科发育与基础儿科知识问答场景。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "knowledge_05",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问免疫学、病原学或实验室机制相关知识，如抗原抗体反应、补体激活、检验原理等，模型需要给出机制性说明。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖免疫与检验原理类基础医学题。"
+      }
+    ],
+    "batch_index": 8,
+    "examples": [
+      {
+        "example_id": "physician_15",
+        "subset": "physician",
+        "question": "三个关节同时受累，称为____\n选项:\nA. 单关节炎\nB. 多关节炎\nC. 对称性关节炎\nD. 少关节炎",
+        "answer": "正确答案: D. 少关节炎"
+      },
+      {
+        "example_id": "physician_16",
+        "subset": "physician",
+        "question": "6个月女婴，因贫血住院，试验检查血清叶酸小于3μg/L，诊断营养性巨幼红细胞贫血，给予叶酸治疗，为了提高疗效，应同时服____\n选项:\nA. VitB2\nB. VitD\nC. VitC\nD. VitA",
+        "answer": "正确答案: C. VitC"
+      },
+      {
+        "example_id": "physician_17",
+        "subset": "physician",
+        "question": "女性，40岁，参加婚宴后右上腹痛，呈剧烈绞痛，查体见表情痛苦不安。对该患者在确诊前应禁忌的处置是____\n选项:\nA. 镇痛药止痛\nB. 抗生素消炎\nC. 急查血常规\nD. 行PTC检查",
+        "answer": "正确答案: A. 镇痛药止痛"
+      },
+      {
+        "example_id": "physician_18",
+        "subset": "physician",
+        "question": "正常情况下，小儿颈曲形成的时间是____\n选项:\nA. 7个月\nB. 6个月\nC. 4个月\nD. 3个月",
+        "answer": "正确答案: D. 3个月"
+      },
+      {
+        "example_id": "physician_19",
+        "subset": "physician",
+        "question": "抢救急性一氧化碳中毒，尽快纠正组织缺氧效果最佳的是哪项____\n选项:\nA. 迅速离开现场\nB. 吸氧\nC. 输血\nD. 高压氧舱治疗",
+        "answer": "正确答案: D. 高压氧舱治疗"
+      },
+      {
+        "example_id": "physician_20",
+        "subset": "physician",
+        "question": "补钾速度一般每小时不宜超过____\n选项:\nA. 10mmol\nB. 20mmol\nC. 30mmol\nD. 40mmol",
+        "answer": "正确答案: B. 20mmol"
+      },
+      {
+        "example_id": "physician_21",
+        "subset": "physician",
+        "question": "经典途径激活补体的抗原抗体复合物____\n选项:\nA. SigA与抗原组成的复合物\nB. 1个lgM与抗原组成的复合物\nC. 1个lgG与抗原组成的复合物\nD. 1个lgE与抗原组成的复合物",
+        "answer": "正确答案: B. 1个lgM与抗原组成的复合物"
+      },
+      {
+        "example_id": "physician_22",
+        "subset": "physician",
+        "question": "心理治疗成功的关键是____\n选项:\nA. 以上均是\nB. 医生的医术\nC. 良好的医患关系\nD. 家属的配合",
+        "answer": "正确答案: A. 以上均是"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本中大量为医学考试概念题、机制题和规范题，现有库主要覆盖问诊/解释类任务，缺少面向医学知识问答、概念辨析和临床规范判断的抽象能力描述。",
+      "部分题目涉及疾病机制、并发症、危险因素、分型和护理/医疗规范，适合纳入知识性判断而非患者咨询。",
+      "现有report/disease/triage类已足够覆盖常规解释场景，但需要新增一个更通用的医学考试知识问答prototype，以及几个细分的机制/规范/管理类能力。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病或医学概念是什么、核心机制、常见表现、危险因素、并发症或基本处理思路，模型需要进行面向学习和理解的科普性解释，而不是给出个体化诊疗结论。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展为更通用的疾病与医学概念解释，覆盖机制、危险因素、并发症等考试常见问法。"
+      },
+      {
+        "target_prototype_id": "disease_02",
+        "prototype": {
+          "prototype_id": "disease_02",
+          "task_type": "disease_education",
+          "description": "用户咨询慢性病或常见内科疾病的管理重点，模型需要解释病因、危险因素、分型、并发症预防和长期管理原则。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "补充慢病题中的分型、并发症预防和长期管理维度。"
+      },
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供实验室或生化检查结果，模型需要结合参考范围解释异常指标的临床意义、常见原因及是否需要复查或进一步评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将检查解读从单纯肝肾电解质扩展到更广义的实验室结果解释。"
+      },
+      {
+        "target_prototype_id": "summary_04",
+        "prototype": {
+          "prototype_id": "summary_04",
+          "task_type": "summary",
+          "description": "模型需要将患者问题、检查信息或医学知识点整理成便于复习、交接或就诊准备的结构化要点清单。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "使summary类同时覆盖医学知识点梳理和就诊准备等结构化整理任务。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "med_01",
+          "task_type": "medical_qa",
+          "description": "用户提出医学考试或知识性问题，模型需要基于基础医学、临床医学和医疗规范进行准确作答，重点考查概念辨析、机制解释、病因诊断、分型比较和规范判断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中大量为直接知识问答，现有任务类型缺少独立承载医学考试题能力的prototype。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_02",
+          "task_type": "medical_qa",
+          "description": "用户询问疾病的发病机制、免疫反应、病理生理改变或液体/电解质失衡原理时，模型需要进行机制层面的解释和推断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖脱水、超敏反应、免疫介导疾病等机制型考点。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_03",
+          "task_type": "medical_qa",
+          "description": "用户询问临床护理、医疗操作、器械管理或医院工作规范时，模型需要根据通用医疗流程与规范进行判断和说明。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本包含引流管处理、医疗规范等考试常见规范题。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_04",
+          "task_type": "medical_qa",
+          "description": "用户询问肿瘤、感染、神经血管等疾病的高危因素、转移规律、并发症或常见分型时，模型需要进行临床知识辨析。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖危险因素、转移模式和分型比较等临床知识题。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "med_05",
+          "task_type": "medical_qa",
+          "description": "用户询问儿科、妇产科或老年医学中的常见医学知识点，模型需要围绕年龄相关生理特点、心理发展、妊娠相关风险或老年基础病影响进行回答。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及婴幼儿心理卫生、妊娠相关判断等人群特异性知识。"
+      }
+    ],
+    "batch_index": 9,
+    "examples": [
+      {
+        "example_id": "physician_23",
+        "subset": "physician",
+        "question": "下列各种引流管，不正确的处理是____\n选项:\nA. 要注意观察各种引流管是否通畅\nB. 仔细记录引流液的色泽和容量\nC. 留置胆管内的“T”形管可在术后1周拔除\nD. 胃肠功能恢复后可将胃肠减压管除去",
+        "answer": "正确答案: C. 留置胆管内的“T”形管可在术后1周拔除"
+      },
+      {
+        "example_id": "physician_24",
+        "subset": "physician",
+        "question": "婴幼儿心理卫生最主要的任务是____\n选项:\nA. 继胎教后立即开始生后相关训练\nB. 经常给孩子以爱抚\nC. 创造尽可能好的生活环境\nD. 抓住关键期，促进认知情感的健康发展",
+        "answer": "正确答案: D. 抓住关键期，促进认知情感的健康发展"
+      },
+      {
+        "example_id": "physician_25",
+        "subset": "physician",
+        "question": "目前认为多数人类肾小球疾病是____\n选项:\nA. 遗传性疾病\nB. 是细菌感染性疾病\nC. 免疫介导的疾病\nD. 免疫缺陷性疾病",
+        "answer": "正确答案: C. 免疫介导的疾病"
+      },
+      {
+        "example_id": "physician_26",
+        "subset": "physician",
+        "question": "等渗性脱水多源于____。\n选项:\nA. 急性胃肠炎腹泻，呕吐不止\nB. 慢性肠梗阻\nC. 剧烈运动大量出汗\nD. 低位小肠漏",
+        "answer": "正确答案: A. 急性胃肠炎腹泻，呕吐不止"
+      },
+      {
+        "example_id": "physician_27",
+        "subset": "physician",
+        "question": "属于Ⅳ型超敏反应的疾病是____\n选项:\nA. 血清过敏性休克\nB. 接触性皮炎\nC. 类风湿性关节炎\nD. 新生儿溶血症",
+        "answer": "正确答案: B. 接触性皮炎"
+      },
+      {
+        "example_id": "physician_28",
+        "subset": "physician",
+        "question": "早期出现肺门及纵膈多发淋巴结转移的肺癌类型是____\n选项:\nA. 鳞癌\nB. 大细胞肺癌\nC. 小细胞肺癌\nD. 腺癌",
+        "answer": "正确答案: D. 腺癌"
+      },
+      {
+        "example_id": "physician_29",
+        "subset": "physician",
+        "question": "以下哪项是高血压脑出血主要危险因素____\n选项:\nA. 糖尿病或血糖增高\nB. 血清胆固醇增高\nC. 突然血压增高\nD. 脑动脉硬化",
+        "answer": "正确答案: C. 突然血压增高"
+      },
+      {
+        "example_id": "physician_30",
+        "subset": "physician",
+        "question": "医疗机构从业人员基本行为规范是哪些人应当遵守的。____\n选项:\nA. 医生\nB. 护士\nC. 所有从业人员\nD. 其他人员",
+        "answer": "正确答案: C. 所有从业人员"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本中大量为医学知识点/考试概念辨析题，现有库对“疾病教育/报告解读”等偏患者问答的覆盖不足。",
+      "需要补充对医学基础概念、法规制度、检查方法选择、妇产科与儿科基础知识的抽象能力描述。",
+      "部分现有prototype可扩展为“鉴别/诊断思路/检查选择”而不仅是症状咨询，以覆盖临床医学与 physician 类样本。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病的定义、核心特征、常见病因、典型表现、基本诊断思路和一般处理原则，模型需要做医学科普和概念辨析，而不是给出个体化诊疗或考试式死记硬背答案。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "扩展为更通用的疾病概念与诊疗思路解释，可覆盖基础医学概念题。"
+      },
+      {
+        "target_prototype_id": "disease_03",
+        "prototype": {
+          "prototype_id": "disease_03",
+          "task_type": "disease_education",
+          "description": "用户咨询感染性疾病、病原学、传播途径、标志性化验结果、隔离与预防原则等内容，模型需要解释感染相关基础知识与公共卫生要点，并避免制造恐慌。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中包含传染病标志物与感染基础知识，需强调病原与检验指标对应关系。"
+      },
+      {
+        "target_prototype_id": "report_05",
+        "prototype": {
+          "prototype_id": "report_05",
+          "task_type": "report_interpretation",
+          "description": "用户提供影像或专科检查结论，模型需要解释检查提示的临床意义、常见对应疾病、检查方法适用场景和后续随访思路，而不只限于简单结节描述。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "部分样本涉及检查方法选择与检查结论的医学意义，需扩大到检查适用性。"
+      },
+      {
+        "target_prototype_id": "followup_03",
+        "prototype": {
+          "prototype_id": "followup_03",
+          "task_type": "followup_question",
+          "description": "用户咨询检查结果但缺少具体指标、检查类型、参考范围、时间点或相关症状，模型需要先明确缺失信息并索取可用于判断的关键背景。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "提升对检验/检查题的前置信息补充能力。"
+      },
+      {
+        "target_prototype_id": "summary_01",
+        "prototype": {
+          "prototype_id": "summary_01",
+          "task_type": "summary",
+          "description": "多轮问诊或病例材料后，模型需要将人口学信息、主诉、病程、既往史、检查结果、处理经过和关键阴性/阳性信息整理成结构化医学摘要。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "覆盖临床病例式信息整合场景，不局限于普通问诊摘要。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "med_basics_01",
+          "task_type": "disease_education",
+          "description": "用户询问常见医学基础概念、病理生理、典型临床表现与术语含义，模型需要进行准确概念解释、机制梳理和术语辨析。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "CEval physician样本大量考察基础医学概念与术语，对现有病种科普库是明显缺口。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "guideline_01",
+          "task_type": "disease_education",
+          "description": "用户询问医学制度、诊疗规范、执业规则、适应证或禁忌证等标准化知识，模型需要依据通行规则进行原则性回答，避免把制度问题回答成临床诊断问题。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中有医师法规与操作适应证类问题，属于现有医疗问答库未覆盖的制度/规范知识。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "exam_01",
+          "task_type": "disease_education",
+          "description": "用户询问某检查、化验或操作方法的首选性、最可靠性、主要用途和适用场景，模型需要比较不同方法的诊断价值并给出原则性选择依据。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及检查方法选择和诊断流程优先级，适合单独建模为检查选择能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "obgyn_01",
+          "task_type": "symptom_qa",
+          "description": "用户咨询月经、妊娠、产科状态、新生儿基本分类或妇产科常见生理/病理概念，模型需要给出规范的妇产科基础解释与风险提示。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本覆盖月经特点、妊娠诊断和胎龄分类等妇产科基础知识，现有症状/triage库不足以承载。"
+      }
+    ],
+    "batch_index": 10,
+    "examples": [
+      {
+        "example_id": "physician_31",
+        "subset": "physician",
+        "question": "定期考核不合格的医师暂停执业活动期满，再次考核仍不合格的____\n选项:\nA. 可再试用一年\nB. 注销注册，收回医师执业证书\nC. 在执业医师指导下从事执业活动\nD. 暂停执业活动三年",
+        "answer": "正确答案: B. 注销注册，收回医师执业证书"
+      },
+      {
+        "example_id": "physician_32",
+        "subset": "physician",
+        "question": "左心衰竭肺水肿____\n选项:\nA. 粉红色浆液性泡沫样痰\nB. 铁锈色血痰\nC. 砖红色胶冻样粘痰\nD. 粉红色乳样痰",
+        "answer": "正确答案: A. 粉红色浆液性泡沫样痰"
+      },
+      {
+        "example_id": "physician_33",
+        "subset": "physician",
+        "question": "慢性肾盂肾炎主要辅助检查项目应是____\n选项:\nA. 肾活检\nB. 双肾CT\nC. 双肾B超\nD. 静脉肾盂造影",
+        "answer": "正确答案: D. 静脉肾盂造影"
+      },
+      {
+        "example_id": "physician_34",
+        "subset": "physician",
+        "question": "甲肝感染____\n选项:\nA. 抗HIV阳性\nB. 抗HAV阳性\nC. 抗EBV阳性\nD. 抗HBC阳性",
+        "answer": "正确答案: B. 抗HAV阳性"
+      },
+      {
+        "example_id": "physician_35",
+        "subset": "physician",
+        "question": "诊断性腹腔穿刺不应用于____\n选项:\nA. 小儿及老年人\nB. 精神状态不正常者\nC. 昏迷病人\nD. 诊断已明确的病人",
+        "answer": "正确答案: D. 诊断已明确的病人"
+      },
+      {
+        "example_id": "physician_36",
+        "subset": "physician",
+        "question": "月经的特点，下列正确的是____\n选项:\nA. 月经血易凝固，可有小血块\nB. 月经期可有下腹及腰骶部坠胀感\nC. 正常月经量为60-100m\nD. 月经周期一般为28-30天，提前或推后1周仍属正常范围",
+        "answer": "正确答案: B. 月经期可有下腹及腰骶部坠胀感"
+      },
+      {
+        "example_id": "physician_37",
+        "subset": "physician",
+        "question": "一胎龄为38周的新生儿，出生体重为3500g，其体重位于同胎龄体重标准的第85百分位，下列哪个诊断最为全面而准确____\n选项:\nA. 足月儿，适于胎龄儿\nB. 足月儿，大于胎龄儿\nC. 过期产儿，巨大儿\nD. 过期产儿，大于胎龄儿",
+        "answer": "正确答案: A. 足月儿，适于胎龄儿"
+      },
+      {
+        "example_id": "physician_38",
+        "subset": "physician",
+        "question": "下列哪种方法诊断妊娠最可靠____\n选项:\nA. 停经史，胎动感，腹部渐膨隆\nB. 早孕反应，双合诊子宫增大，尿HCG阳性\nC. 停经史，双合诊子宫增大，B超宫内见妊娠囊\nD. 停经史，早孕反应，B超宫内见光团",
+        "answer": "正确答案: C. 停经史，双合诊子宫增大，B超宫内见妊娠囊"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "样本中大量是医学考试/知识题，核心能力不是问诊式建议，而是医学概念辨析、诊断依据判断、检查/操作选择、治疗原则和基础公共卫生/伦理知识判断。",
+      "现有库对“检验/影像解读”“疾病科普”“分诊”覆盖较强，但对标准医学知识问答、规范性判断题、妇产科/儿科/外科常见考试知识覆盖不足。",
+      "应补充一个更通用的医学考试概念辨析prototype，以及针对妇产科、儿科、外科/消化肛肠等高频知识点的抽象任务描述。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "report_05",
+        "prototype": {
+          "prototype_id": "report_05",
+          "task_type": "report_interpretation",
+          "description": "用户提供影像学、超声或其他检查报告结论，模型需要解释报告所提示的常见含义、可能的临床相关性、局限性以及是否需要结合症状进一步评估。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "将影像报告从少数示例扩展到更通用的检查报告解读任务，覆盖考试中对检查方式和结果意义的判断。"
+      },
+      {
+        "target_prototype_id": "disease_01",
+        "prototype": {
+          "prototype_id": "disease_01",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病或医学概念的定义、病因、发病机制、临床表现、诊断要点、治疗原则和预后，模型需要做基础科普与概念梳理。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "考试样本包含大量概念性医学知识点，需把疾病科普从一般介绍扩展到机制和诊断要点。"
+      },
+      {
+        "target_prototype_id": "disease_04",
+        "prototype": {
+          "prototype_id": "disease_04",
+          "task_type": "disease_education",
+          "description": "用户询问某疾病的严重程度、是否可自愈、是否复发、何时需要就医或进一步检查，模型需要进行风险分层和就医边界说明。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "增强对考试中疾病进展、预后和管理边界类问题的覆盖。"
+      },
+      {
+        "target_prototype_id": "followup_03",
+        "prototype": {
+          "prototype_id": "followup_03",
+          "task_type": "followup_question",
+          "description": "用户咨询检查结果但缺少关键上下文，如具体数值、参考范围、检查类型、症状或既往史，模型需要先说明信息不足并索取补充信息。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "检查题常需要完整上下文才能判断，需明确检查类型与参考范围等要素。"
+      },
+      {
+        "target_prototype_id": "triage_01",
+        "prototype": {
+          "prototype_id": "triage_01",
+          "task_type": "triage",
+          "description": "用户描述胸部不适、呼吸困难、循环不稳定或疑似急危重症线索时，模型需要优先识别危险信号并建议及时急诊评估。",
+          "need_tool": false,
+          "risk_level": "high"
+        },
+        "reason": "将胸痛分诊扩展为更通用的急症识别能力，覆盖更广的危重征象。"
+      },
+      {
+        "target_prototype_id": "drug_07",
+        "prototype": {
+          "prototype_id": "drug_07",
+          "task_type": "drug_guidance",
+          "description": "用户咨询抗感染药物的适应证、规范使用原则、疗程、停药时机或自行用药风险，模型需要强调按病因和医嘱用药，避免滥用。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "把抗生素相关问题扩展到更一般的抗感染规范用药原则，贴近考试中的用药判断题。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "exam_01",
+          "task_type": "medical_exam_qa",
+          "description": "用户提出医学考试式知识问答，要求在疾病、药物、检查、操作、预防或伦理等知识点中进行概念辨析、正确选项判断或关键原则识别，模型需要基于标准医学知识给出简洁准确的判断与依据。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本主体是医学考试题，现有task_type无法充分覆盖，需要新增通用医学知识判别能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "obgyn_01",
+          "task_type": "medical_exam_qa",
+          "description": "用户询问妇产科相关基础知识，包括妊娠、分娩、产后、妇科常见疾病、检查方法、并发症识别和安全操作原则，模型需要进行专业知识判断而非个体化诊疗。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本中出现明显妇产科考试知识点，值得单独抽象为高频专科知识能力。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "peds_01",
+          "task_type": "medical_exam_qa",
+          "description": "用户询问儿科相关基础知识，包括儿童生理特点、常见疾病、喂养与护理、危险信号和用药年龄限制，模型需要做规范性知识判断。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "儿科知识在考试中常以规范判断形式出现，需要独立覆盖。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "surgery_01",
+          "task_type": "medical_exam_qa",
+          "description": "用户询问外科、消化系统或肛肠相关基础知识，包括常见疾病的典型表现、检查选择、处理原则和手术/非手术适应证，模型需要进行医学知识辨析。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及外科、消化和肛肠常见知识判断，现有库没有专门覆盖。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "ethics_01",
+          "task_type": "medical_exam_qa",
+          "description": "用户询问医学伦理、医疗文书或公共卫生规范等原则性知识，模型需要基于通行医学规范进行判断与解释。",
+          "need_tool": false,
+          "risk_level": "low"
+        },
+        "reason": "样本包含医德、健康档案等规范性知识题，适合单独新增。"
+      }
+    ],
+    "batch_index": 11,
+    "examples": [
+      {
+        "example_id": "physician_39",
+        "subset": "physician",
+        "question": "下述有关痛风病的非药物治疗中，不正确的是____\n选项:\nA. 禁酒\nB. 控制饮水\nC. 保持理想体重\nD. 限制高嘌呤食物摄入",
+        "answer": "正确答案: B. 控制饮水"
+      },
+      {
+        "example_id": "physician_40",
+        "subset": "physician",
+        "question": "诊断前置胎盘最可靠而安全的方法是____\n选项:\nA. X线腹部平片\nB. B超检查\nC. 阴道双合诊\nD. 肛查",
+        "answer": "正确答案: B. B超检查"
+      },
+      {
+        "example_id": "physician_41",
+        "subset": "physician",
+        "question": "关于健康档案填写的要求，描述有误的是____\n选项:\nA. 档案填写—律用钢笔或圆珠笔\nB. 字迹要清楚，书写要工整\nC. 如果填错，用红笔涂改修正\nD. 数字或代码—律用阿拉伯数字书写",
+        "answer": "正确答案: C. 如果填错，用红笔涂改修正"
+      },
+      {
+        "example_id": "physician_42",
+        "subset": "physician",
+        "question": "以下母乳喂养的优点中，不正确的是____\n选项:\nA. 蛋白质、脂肪、糖比例合适\nB. 母乳含免疫性物质\nC. 母乳喂养帮助母亲产后子宫复原\nD. 母乳中酪蛋白多",
+        "answer": "正确答案: D. 母乳中酪蛋白多"
+      },
+      {
+        "example_id": "physician_43",
+        "subset": "physician",
+        "question": "患者男，56岁。右膝关节疼痛半年，加重5天，尤以上楼梯时加剧。X线检查显示膝关节退行性改变，诊断为髌骨软骨软化症。非手术治疗首先应制动膝关节的时间是____\n选项:\nA. 1～2周\nB. 3~4周\nC. 4~5周\nD. 6~7周",
+        "answer": "正确答案: A. 1～2周"
+      },
+      {
+        "example_id": "physician_44",
+        "subset": "physician",
+        "question": "1981年6月，在上海举行的第一次全国医学伦理道德学术讨论会确立了医德基本原则____\n选项:\nA. 救死扶伤\nB. 以上都是\nC. 实行社会主义人道主义\nD. 全心全意为人民服务",
+        "answer": "正确答案: B. 以上都是"
+      },
+      {
+        "example_id": "physician_45",
+        "subset": "physician",
+        "question": "抗代谢类抗癌药是____\n选项:\nA. 环磷酰胺\nB. 氟尿嘧啶\nC. 放线菌素D\nD. 长春新碱",
+        "answer": "正确答案: B. 氟尿嘧啶"
+      },
+      {
+        "example_id": "physician_46",
+        "subset": "physician",
+        "question": "男，60岁，便秘、间断便血10余年，便后有肿物自肛门脱出，质软，可以还纳，诊断为____\n选项:\nA. 内痔脱出\nB. 肠完全脱出\nC. 外痔\nD. 血栓外痔",
+        "answer": "正确答案: A. 内痔脱出"
+      }
+    ]
+  },
+  {
+    "insights": [
+      "这批样本明显包含医学考试知识问答能力，不属于现有问诊/宣教/分诊主导的覆盖范围。",
+      "现有库缺少对病理生理机制、解剖生理、药理与检验指标的纯知识辨析型任务刻画。",
+      "应新增一个更通用的医学知识问答/概念辨析prototype，用于覆盖基础医学与临床医学客观题类样本。",
+      "对report类prototype可补充“指标/机制/原理层面的判断”，而不仅是患者易懂解释。"
+    ],
+    "updates": [
+      {
+        "target_prototype_id": "report_02",
+        "prototype": {
+          "prototype_id": "report_02",
+          "task_type": "report_interpretation",
+          "description": "用户提供实验室检查结果，模型需要结合指标变化、参考范围和临床背景解释其医学意义，必要时进一步判断相关病理生理状态或严重程度。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本涉及对关键实验室指标背后医学含义的判断，可扩大report覆盖到检查机制和严重程度辨析。"
+      }
+    ],
+    "new_prototypes": [
+      {
+        "prototype": {
+          "prototype_id": "med_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户提出基础医学、临床医学或药理学的知识性问题，模型需要进行概念辨析、机制解释、指标/部位/作用判断和最佳选项识别，而不是给出问诊式建议。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "当前库缺少面向医学考试知识点的通用知识问答prototype，样本属于明显新增任务形态。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "physio_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问生理学相关的结构、功能、调节或离子通道/蛋白结合等机制问题，模型需要基于医学知识进行准确辨析。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "样本覆盖生理与机制类考点，需要比通用medical_knowledge_qa更聚焦的能力刻画。"
+      },
+      {
+        "prototype": {
+          "prototype_id": "path_01",
+          "task_type": "medical_knowledge_qa",
+          "description": "用户询问病理生理或疾病严重程度相关的知识点，模型需要识别关键指标、病变机制和临床意义。",
+          "need_tool": false,
+          "risk_level": "medium"
+        },
+        "reason": "可用于覆盖以严重程度判断、病理机制解释为核心的考试类问题。"
+      }
+    ],
+    "batch_index": 12,
+    "examples": [
+      {
+        "example_id": "physician_47",
+        "subset": "physician",
+        "question": "下列哪项指标最能反映糖尿病酮症酸中毒的严重程度____\n选项:\nA. 血糖\nB. 血钠\nC. 尿酮体\nD. 血碳酸氢根",
+        "answer": "正确答案: D. 血碳酸氢根"
+      },
+      {
+        "example_id": "physician_48",
+        "subset": "physician",
+        "question": "骨骼肌中Ca离子的结合位点是____\n选项:\nA. 肌纤蛋白\nB. 原肌凝蛋白\nC. 肌钙蛋白亚单位I\nD. 肌钙蛋白亚单位C",
+        "answer": "正确答案: D. 肌钙蛋白亚单位C"
+      }
+    ]
+  }
+]

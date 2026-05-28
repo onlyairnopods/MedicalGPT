@@ -776,6 +776,14 @@ def main():
             **model_kwargs
         )
 
+        # Compile model for faster training (PyTorch 2.0+, non-Windows)
+        if torch.__version__ >= '2' and sys.platform != 'win32' and not script_args.use_peft: # 如果使用PEFT，则不使用torch.compile
+            logger.info("🔧 开启 torch.compile 优化")
+            model = torch.compile(model)
+        # 注意：torch.compile 后会返回 OptimizedModule 包装后的模型，
+        # 原生属性如 hf_device_map、named_parameters、get_input_embeddings 等仍可正常访问，
+        # 但直接替换 forward 等操作需要在 compile 之前完成
+
         logger.info("✅ 模型加载完成")
 
         # 显示模型分布信息

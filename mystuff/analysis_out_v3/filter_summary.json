@@ -1,0 +1,22 @@
+{
+  "input_rows": 1949337,
+  "kept_rows": 34429,
+  "dropped_rows": 1914908,
+  "kept_rate": 0.017662,
+  "drop_reason_counts": {
+    "below_min_score": 1830645,
+    "beyond_per_prototype_topk": 1768646,
+    "below_min_assistant_chars": 178365,
+    "normalized_duplicate": 133610,
+    "below_prototype_quantile_0.1": 194950,
+    "above_max_total_chars": 1187
+  },
+  "settings": {
+    "min_score": 0.45,
+    "min_assistant_chars": 5,
+    "max_total_chars": 4000,
+    "dedupe": "normalized",
+    "per_prototype_topk": 3000,
+    "per_prototype_min_quantile": 0.1
+  }
+}

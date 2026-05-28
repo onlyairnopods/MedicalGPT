@@ -1,0 +1,17 @@
+group: ceval
+task:
+  - ceval_basic_medicine
+  - ceval_clinical_medicine
+  - ceval_physician
+metadata:
+  version: 1.0
+metric_list:
+- metric: acc
+  aggregation: mean
+  weight_by_size: true
+- metric: acc_norm
+  aggregation: mean
+  weight_by_size: true
+- metric: perplexity
+  aggregation: mean
+  weight_by_size: true
